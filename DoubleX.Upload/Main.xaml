@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DoubleX.Upload"
         xmlns:dxui="http://doublex.com/doublexui"
         mc:Ignorable="d"
-        Title="上传工具" Width="1120" WindowStartupLocation="CenterScreen">
+        Title="上传工具" Width="1120" WindowStartupLocation="CenterScreen" IsTitleVisible="False" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

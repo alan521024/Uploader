@@ -49,7 +49,7 @@
                 <TextBlock Text="页" Margin="5,0"  VerticalAlignment="Center" />
                 <Button Content="GO" Click="btnGo_Click" Margin="5,0" Padding="5,0" Height="18"  />
             </StackPanel>
-            <Button Grid.Column="1" Margin="10">导出记录</Button>
+            <Button Grid.Column="1" Margin="10" Visibility="Hidden">导出记录</Button>
         </Grid>
     </Grid>
 </dxui:DxWindow>
