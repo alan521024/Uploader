@@ -1,0 +1,65 @@
+﻿<dxui:DxWindow x:Class="DoubleX.Upload.Demo"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DoubleX.Upload"
+        xmlns:dxui="http://doublex.com/doublexui"
+        mc:Ignorable="d"
+        Title="Demo">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="20,10">
+            <Label>系统Label：</Label> <Label>label测试</Label>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal"  Margin="20,10">
+            <Label>自定义Label：</Label>
+            <dxui:DxLabel IconLeft="&#xf001;" >左图标</dxui:DxLabel>
+            <dxui:DxLabel IconRight="&#xf0c0;" >右图标</dxui:DxLabel>
+            <dxui:DxLabel IconLeft="&#xf001;" IconRight="&#xf0c0;">双图标</dxui:DxLabel>
+            <dxui:DxLabel IconLeft="&#xf001;" IconRight="&#xf0c0;" IsEnabled="False">禁用</dxui:DxLabel>
+            <dxui:DxLabel IconLeft="&#xf001;" IconRight="&#xf0c0;" Visibility="Hidden">隐藏</dxui:DxLabel>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal"  Margin="20,10">
+            <Button Margin="10">系统Button</Button>
+            <Button Margin="10" Style="{DynamicResource Button-Primary}">Button-Primary测试</Button>
+            <Button Margin="10" Style="{DynamicResource Button-Success}">Button-Success测试</Button>
+            <Button Margin="10" Style="{DynamicResource Button-Info}">Button-Info测试</Button>
+            <Button Margin="10" Style="{DynamicResource Button-Waming}">Button-Waming测试</Button>
+            <Button Margin="10" Style="{DynamicResource Button-Danger}">Button-Waming测试</Button>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Orientation="Horizontal"  Margin="20,10">
+            <Button Margin="10" IsEnabled="False">系统Button（Enable）</Button>
+            <Button Margin="10" Style="{DynamicResource Button-Primary}" IsEnabled="False">Button-Primary测试</Button>
+            <Button Margin="10" Style="{DynamicResource Button-Success}" IsEnabled="False">Button-Success测试</Button>
+            <Button Margin="10" Style="{DynamicResource Button-Info}" IsEnabled="False">Button-Info测试</Button>
+            <Button Margin="10" Style="{DynamicResource Button-Waming}" IsEnabled="False">Button-Waming测试</Button>
+            <Button Margin="10" Style="{DynamicResource Button-Danger}" IsEnabled="False">Button-Waming测试</Button>
+        </StackPanel>
+        <StackPanel Grid.Row="4" Orientation="Horizontal"  Margin="20,10">
+            <dxui:DxButton Margin="10" IconLeft="&#xf07b;">系统Button</dxui:DxButton>
+        </StackPanel>
+        <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="20,10">
+            <TextBlock>系统TextBlock测试</TextBlock>
+            <Label>label测试</Label>
+        </StackPanel>
+        <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="20,10">
+            <Label>标题：</Label>
+            <TextBox>TextBox测试</TextBox>
+        </StackPanel>
+        <StackPanel Grid.Row="7" Orientation="Horizontal" Margin="20,10">
+            <TextBox Tag="分组标题：" Style="{DynamicResource Label-Text-Group}">TextBox测试</TextBox>
+            <TextBox Tag="分组标题2：" Style="{DynamicResource Label-Text-Group}">TextBox测试</TextBox>
+        </StackPanel>
+    </Grid>
+</dxui:DxWindow>

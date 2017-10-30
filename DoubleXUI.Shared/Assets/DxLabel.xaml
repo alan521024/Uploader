@@ -1,0 +1,96 @@
+﻿<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:shell="http://schemas.microsoft.com/winfx/2006/xaml/presentation/shell"
+    xmlns:dxui="clr-namespace:DoubleXUI"
+    xmlns:controls="clr-namespace:DoubleXUI.Controls"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Converters.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <Style x:Key="DxLabelBase" TargetType="controls:DxLabel">
+        <Setter Property="FontSize" Value="{DynamicResource DefaultFontSize}"></Setter>
+        <Setter Property="Foreground" Value="{DynamicResource ColorGroupBrush0}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="controls:DxLabel">
+                    <Grid Visibility="{Binding Visibility}" >
+                        <Border Margin="{TemplateBinding Margin}"  Padding="{TemplateBinding Padding}"  BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" Background="{TemplateBinding Background}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+                            <Grid x:Name="grid" Margin="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid>
+                                    <TextBlock x:Name="IconLeft"
+                                      Margin="5,0,5,0" 
+                                      Text="{TemplateBinding IconLeft}"
+                                      DataContext="{TemplateBinding IconLeft}"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Left"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      Background="{TemplateBinding Background}"
+                                      Style="{DynamicResource FontAwesome}">
+                                    </TextBlock>
+                                </Grid>
+                                <Grid Grid.Column="1" >
+                                    <TextBlock  x:Name="Text"
+                                       Margin="5,0,5,0"
+                                       Text="{TemplateBinding Content}"
+                                       DataContext="{TemplateBinding Content}"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Left"
+                                       TextTrimming="{Binding TextTrimming}"
+                                       Foreground="{TemplateBinding Foreground}"
+                                       Background="{TemplateBinding Background}">
+                                    </TextBlock>
+                                </Grid>
+                                <Grid Grid.Column="2" >
+                                    <TextBlock x:Name="IconRight"
+                                      Margin="0,0,5,0" 
+                                      Text="{TemplateBinding IconRight}" 
+                                      DataContext="{TemplateBinding IconRight}"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Right"
+                                      Foreground="{TemplateBinding Foreground}"
+                                      Background="{TemplateBinding Background}"
+                                      Style="{DynamicResource FontAwesome}">
+                                    </TextBlock>
+                                </Grid>
+                            </Grid>
+                        </Border>
+                        <!-- 三角形 -->
+                        <!--<TextBlock VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <Polygon x:Name="buttonPolygon" Stretch="Fill" Points="0,50,600,50,290,100" Width="6" Height="6"
+                                     Margin="0,0,-6,0"
+                                     HorizontalAlignment="Right" 
+                                     VerticalAlignment="Center">
+                                <Polygon.RenderTransform>
+                                    <TransformGroup>
+                                        <RotateTransform Angle="-90"/>
+                                    </TransformGroup>
+                                </Polygon.RenderTransform>
+                                <Polygon.Fill>
+                                    <SolidColorBrush Color="Gry" Opacity="0.5"></SolidColorBrush>
+                                </Polygon.Fill>
+                            </Polygon>
+                        </TextBlock>-->
+                        <Rectangle x:Name="EnabledLayer" Fill="#4CFFFFFF" RadiusX="4" RadiusY="4" Visibility="Collapsed"/>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="EnabledLayer" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style BasedOn="{StaticResource DxLabelBase}" TargetType="controls:DxLabel"></Style>
+
+</ResourceDictionary>

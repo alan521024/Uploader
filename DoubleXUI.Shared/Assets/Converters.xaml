@@ -1,0 +1,13 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:converters="clr-namespace:DoubleXUI.Converters">
+
+    <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <converters:BooleanToFontWeightConverter x:Key="BooleanToFontWeightConverter" />
+    <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    <converters:NullOrEmptyStringToVisibilityConverter x:Key="NullOrEmptyStringToVisibilityConverter" />
+    <converters:ToUpperConverter x:Key="ToUpperConverter" />
+    <converters:ToLowerConverter x:Key="ToLowerConverter" />
+    <converters:IconButtonVisibilityConverter x:Key="IconButtonVisibilityConverter" /> 
+
+</ResourceDictionary>

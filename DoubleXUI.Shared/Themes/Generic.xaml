@@ -1,0 +1,11 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:DoubleXUI.Controls"
+                    xmlns:shell="http://schemas.microsoft.com/winfx/2006/xaml/presentation/shell">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/DoubleXUI;component/Assets/DoubleXUI.xaml" />
+        <ResourceDictionary Source="/DoubleXUI;component/Themes/Default/Style.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+</ResourceDictionary>

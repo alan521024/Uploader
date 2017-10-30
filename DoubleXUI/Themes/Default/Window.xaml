@@ -1,0 +1,107 @@
+﻿<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Base.xaml" />
+    </ResourceDictionary.MergedDictionaries>
+
+    <sys:Double x:Key="WindowSysBtnWidth">32</sys:Double>
+    <sys:Double x:Key="WindowSysBtnHeight">24</sys:Double>
+    
+    <!-- 字体/边框/(颜色/前景色)/背景 -->
+    <SolidColorBrush x:Key="WindowBorderColor" Color="{StaticResource MainColor1}" Opacity=".5"  />
+    <SolidColorBrush x:Key="WindowForegroundColor" Color="{StaticResource MainColor2}" />
+    <SolidColorBrush x:Key="WindowBackgroundColor" Color="{StaticResource MainColor}" />
+    <SolidColorBrush x:Key="WindowHeaderBackground" Color="{StaticResource MainColor}" />
+
+    <SolidColorBrush x:Key="WindowSysBtnForegroundColor" Color="{StaticResource ColorGroup10}" />
+    <SolidColorBrush x:Key="WindowSysBtnMoseOverForegroundColor" Color="{StaticResource ColorGroup11}" />
+    <SolidColorBrush x:Key="WindowSysBtnMoseOverBackgroundColor" Color="Transparent" />
+    <SolidColorBrush x:Key="WindowSysBtnIsPressedForegroundColor" Color="{StaticResource ColorGroup12}" />
+    <SolidColorBrush x:Key="WindowSysBtnIsPressedBackgroundColor" Color="Transparent" />
+    <SolidColorBrush x:Key="WindowSysBtnDisabledForegroundColor" Color="{StaticResource ColorGroup13}" />
+    <SolidColorBrush x:Key="WindowSysBtnDisabledBackgroundColor" Color="Transparent" />
+    <SolidColorBrush x:Key="WindowSysBtnCloseForegroundColor" Color="{StaticResource MainColor2}" />
+    <SolidColorBrush x:Key="WindowSysBtnBackgroundColor" Color="Transparent" />
+    
+
+
+    <LinearGradientBrush x:Key="WindowHeaderGradient" StartPoint="0, 0" EndPoint="0, 1" Opacity=".1">
+        <GradientStop Offset="0" Color="{DynamicResource MainColor}" />
+        <GradientStop Offset=".3" Color="{DynamicResource MainColor}" />
+        <GradientStop Offset="1" Color="Transparent" />
+    </LinearGradientBrush>
+    <Rectangle x:Key="WindowBackgroundContent" x:Shared="false" Height="296" Margin="0,80,0,0" Fill="{StaticResource WindowHeaderGradient}" VerticalAlignment="Top"/>
+
+    <!-- 头部(标题文字,暂未设置图标) -->
+    <Style x:Key="WindowHeader" TargetType="Grid">
+        <Setter Property="Height" Value="80"></Setter>
+        <Setter Property="Background" Value="{StaticResource WindowHeaderBackground}"></Setter>
+    </Style>
+    <Style x:Key="WindowHeaderBorder" TargetType="Border">
+        <Setter Property="BorderBrush" Value="{StaticResource WindowBorderColor}"></Setter>
+        <Setter Property="BorderThickness" Value="0,0,0,1"></Setter>
+    </Style>
+    <Style x:Key="WindowHeaderTitle" TargetType="TextBlock">
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+        <Setter Property="Margin" Value="8,0" />
+        <Setter Property="Foreground" Value="{DynamicResource DefaultFontWhilt}" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
+
+    <!-- 头部(系统按钮) -->
+    <Style x:Key="WindowHeaderSysBtnBase" TargetType="ButtonBase">
+        <Setter Property="Width" Value="{StaticResource WindowSysBtnWidth}" />
+        <Setter Property="Height" Value="{StaticResource WindowSysBtnHeight}" />
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{StaticResource WindowSysBtnForegroundColor}"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Padding" Value="1"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ButtonBase}">
+                    <Border Name="Chrome"
+                                Background="{TemplateBinding Background}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                SnapsToDevicePixels="true">
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              RecognizesAccessKey="True"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="WindowHeaderSysBtn" BasedOn="{StaticResource WindowHeaderSysBtnBase}" TargetType="ButtonBase">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource WindowSysBtnMoseOverForegroundColor}"/>
+                <Setter Property="Background" Value="{DynamicResource WindowSysBtnMoseOverBackgroundColor}" />
+            </Trigger>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource WindowSysBtnIsPressedForegroundColor}" />
+                <Setter Property="Background" Value="{DynamicResource WindowSysBtnIsPressedBackgroundColor}" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="false">
+                <Setter Property="Foreground" Value="{DynamicResource WindowSysBtnDisabledForegroundColor}" />
+                <Setter Property="Background" Value="{DynamicResource WindowSysBtnDisabledBackgroundColor}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style x:Key="WindowHeaderSysBtnClose" TargetType="ButtonBase" BasedOn="{StaticResource WindowHeaderSysBtn}">
+        <Style.Triggers>
+            <Trigger Property="IsPressed" Value="True">
+                <Setter Property="Foreground" Value="{DynamicResource WindowSysBtnCloseForegroundColor}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+</ResourceDictionary>

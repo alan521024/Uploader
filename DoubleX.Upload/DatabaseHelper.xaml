@@ -1,0 +1,52 @@
+﻿<dxui:DxWindow x:Class="DoubleX.Upload.DatabaseHelper"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DoubleX.Upload"
+        xmlns:dxui="http://doublex.com/doublexui"
+        mc:Ignorable="d"
+        Title="数据库操帮助" Width="600" Height="300" ResizeMode="NoResize">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" Margin="0,0,0,10">数据库连接字符串示例：</Label>
+        <Grid Grid.Row="1"  Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" VerticalAlignment="Center">SQLServer：</Label>
+            <TextBox Grid.Column="1" Text="Data Source=localhost;Initial Catalog=DB_Test;User Id=test;Password=123456;" Margin="0,0,0,0" Width="Auto"></TextBox>
+        </Grid>
+        <Grid Grid.Row="2"  Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" VerticalAlignment="Center">MySql：</Label>
+            <TextBox Grid.Column="1" Text="Data Source=localhost;port=3306;Initial Catalog=db_test;user id=sa;password=123456;Charset=utf8" Margin="0,0,0,0" Width="Auto"></TextBox>
+        </Grid>
+        <Grid Grid.Row="3" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" VerticalAlignment="Center">Oracle：</Label>
+            <TextBox Grid.Column="1" Text="Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=***.***.***.***)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=***)));Persist Security Info=True;User ID=***;Password=***;" Margin="0,0,0,0" Width="Auto"></TextBox>
+        </Grid>
+        <Grid Grid.Row="4" Margin="0,0,0,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" VerticalAlignment="Center">SQLite：</Label>
+            <TextBox Grid.Column="1" Text="Data Source=(文件路径，例：C:/xxxx.db);" Margin="0,0,0,0" Width="Auto"></TextBox>
+        </Grid>
+    </Grid>
+</dxui:DxWindow>

@@ -1,0 +1,64 @@
+﻿<ResourceDictionary 
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="Base.xaml" />
+        <ResourceDictionary Source="Window.xaml" />
+        <ResourceDictionary Source="Label.xaml" />
+        <ResourceDictionary Source="Button.xaml" /> 
+        <ResourceDictionary Source="TextBox.xaml" />
+        <ResourceDictionary Source="Tab.xaml" />
+        <ResourceDictionary Source="Panel.xaml" />
+        <ResourceDictionary Source="DataGrid2.xaml" />
+        <!--<ResourceDictionary Source="DataGrid.xaml" />-->
+    </ResourceDictionary.MergedDictionaries>
+
+    <!--字体-->
+    <FontFamily x:Key="DefaultFontFamily">Helvetica Neue,Helvetica,Arial,sans-serif,微软雅黑</FontFamily>
+    <sys:Double x:Key="DefaultFontSize">14</sys:Double>
+
+    <Color x:Key="FontColor0">#34495e</Color>
+    
+    <Color x:Key="DefaultBorderColor">#3498db</Color>
+    <Color x:Key="DefaultForegroundColor">#333333</Color>
+    <Color x:Key="DefaultBackgroundColor">#ffffff</Color>
+
+    <SolidColorBrush x:Key="DefaultColorBrush" Color="{StaticResource DefaultMainColor}" />
+    <SolidColorBrush x:Key="DefaultFont" Color="{StaticResource FontColor0}" />
+    <SolidColorBrush x:Key="DefaultFontWhilt" Color="{StaticResource DefaultBackgroundColor}" />
+    <SolidColorBrush x:Key="DefaultBorder" Color="{StaticResource DefaultBorderColor}" Opacity=".5"  />
+    <SolidColorBrush x:Key="DefaultForeground" Color="{StaticResource DefaultForegroundColor}" />
+    <SolidColorBrush x:Key="DefaultBackground" Color="{StaticResource DefaultBackgroundColor}" />
+
+    <!--尺寸-->
+    <sys:Double x:Key="DefaultControlHeight">28</sys:Double>
+    <sys:Double x:Key="SmallControlHeight">26</sys:Double>
+
+    <!--内边距-->
+    <Thickness x:Key="DefaultControlPadding">12,6</Thickness>
+
+    
+    
+    <!--部件属性 -->
+    <SolidColorBrush x:Key="DefaultControlBorder" Color="#ecf0f1" />
+    <SolidColorBrush x:Key="DefaultControlForeground" Color="{StaticResource FontColor0}" />
+    <SolidColorBrush x:Key="DefaultControlBackground" Color="Transparent" />
+
+
+    <SolidColorBrush x:Key="InputBorder" Color="{StaticResource DefaultBorderColor}" Opacity=".5"  />
+    <SolidColorBrush x:Key="InputForeground" Color="{StaticResource DefaultForegroundColor}" />
+    <SolidColorBrush x:Key="InputBackground" Color="{StaticResource DefaultBackgroundColor}" />
+
+    <SolidColorBrush x:Key="ButtonText" Color="#333333" />
+    <SolidColorBrush x:Key="ButtonTextHover" Color="#333333" />
+    <SolidColorBrush x:Key="ButtonTextPressed" Color="#ffffff" />
+    <SolidColorBrush x:Key="ButtonTextDisabled" Color="#a1a1a1" />
+
+    <SolidColorBrush x:Key="LinkButtonText" Color="#717171" />
+    <SolidColorBrush x:Key="LinkButtonTextHover" Color="#333333" />
+    <SolidColorBrush x:Key="LinkButtonTextPressed" Color="#919191" />
+    <SolidColorBrush x:Key="LinkButtonTextDisabled" Color="#919191" />
+
+</ResourceDictionary>
