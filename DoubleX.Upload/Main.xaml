@@ -7,7 +7,7 @@
         xmlns:dxui="http://doublex.com/doublexui"
         mc:Ignorable="d"
        Width="1120" WindowStartupLocation="CenterScreen" IsTitleVisible="False"  Title="上传工具" 
-               IsLogoVisible="True" LogoPath="pack://application:,,,/Image/acp-base-logo.png" LogoWidth="345" LogoHeight="58" >
+               IsLogoVisible="True" LogoWidth="345" LogoHeight="58" >
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

@@ -104,6 +104,8 @@ namespace DoubleX.Upload
 
         public Main()
         {
+            this.LogoPath = "pack://application:,,,/Image/acp-base-logo.png";
+
             InitializeComponent();
             beforeParam = new List<RequestParamModel>();
             afterParam = new List<RequestParamModel>();
