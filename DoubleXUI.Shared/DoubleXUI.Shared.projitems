@@ -18,6 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Converters\IconTypeConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\NullOrEmptyStringToVisibilityConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\NullToVisibilityConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Converters\PathToImageConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ToLowerConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Converters\ToUpperConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Infrastructure\Content\DefaultContentLoader.cs" />

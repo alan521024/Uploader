@@ -22,6 +22,11 @@ namespace DoubleXUI.Controls
         public static readonly DependencyProperty ContentSourceProperty = DependencyProperty.Register("ContentSource", typeof(Uri), typeof(DxWindow));
         public static readonly DependencyProperty ContentLoaderProperty = DependencyProperty.Register("ContentLoader", typeof(IContentLoader), typeof(DxWindow), new PropertyMetadata(new DefaultContentLoader()));
         public static readonly DependencyProperty IsTitleVisibleProperty = DependencyProperty.Register("IsTitleVisible", typeof(bool), typeof(DxWindow), new PropertyMetadata(false));
+        public static readonly DependencyProperty IsLogoVisibleProperty = DependencyProperty.Register("IsLogoVisible", typeof(bool), typeof(DxWindow), new PropertyMetadata(false));
+        public static readonly DependencyProperty LogoPathProperty = DependencyProperty.Register("LogoPath", typeof(string), typeof(DxWindow));
+        public static readonly DependencyProperty LogoWidthProperty = DependencyProperty.Register("LogoWidth", typeof(double), typeof(DxWindow));
+        public static readonly DependencyProperty LogoHeightProperty = DependencyProperty.Register("LogoHeight", typeof(double), typeof(DxWindow));
+        
         public object BackgroundContent
         {
             get { return GetValue(BackgroundContentProperty); }
@@ -41,6 +46,27 @@ namespace DoubleXUI.Controls
         {
             get { return (bool)GetValue(IsTitleVisibleProperty); }
             set { SetValue(IsTitleVisibleProperty, value); }
+        }
+
+        public bool IsLogoVisible
+        {
+            get { return (bool)GetValue(IsLogoVisibleProperty); }
+            set { SetValue(IsLogoVisibleProperty, value); }
+        }
+        public string LogoPath
+        {
+            get { return (string)GetValue(LogoPathProperty); }
+            set { SetValue(LogoPathProperty, value); }
+        }
+        public double LogoWidth
+        {
+            get { return (double)GetValue(LogoWidthProperty); }
+            set { SetValue(LogoPathProperty, value); }
+        }
+        public double LogoHeight
+        {
+            get { return (double)GetValue(LogoHeightProperty); }
+            set { SetValue(LogoPathProperty, value); }
         }
 
         #endregion

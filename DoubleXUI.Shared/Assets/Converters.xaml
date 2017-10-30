@@ -8,6 +8,7 @@
     <converters:NullOrEmptyStringToVisibilityConverter x:Key="NullOrEmptyStringToVisibilityConverter" />
     <converters:ToUpperConverter x:Key="ToUpperConverter" />
     <converters:ToLowerConverter x:Key="ToLowerConverter" />
-    <converters:IconButtonVisibilityConverter x:Key="IconButtonVisibilityConverter" /> 
+    <converters:IconButtonVisibilityConverter x:Key="IconButtonVisibilityConverter" />
+    <converters:PathToImageConverter x:Key="PathToImageConverter" />
 
 </ResourceDictionary>

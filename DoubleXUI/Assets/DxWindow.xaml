@@ -48,7 +48,7 @@
                                     <!-- 窗体背景内容 -->
                                     <ContentControl Grid.RowSpan="5" Content="{TemplateBinding BackgroundContent}" />
 
-                                    <!-- 标题栏 要以尝试用ContentControl子其它地方引用进来-->
+                                    <!-- 头部 要以尝试用ContentControl子其它地方引用进来-->
                                     <Border Style="{DynamicResource WindowHeaderBorder}">
                                         <Grid Style="{DynamicResource WindowHeader}">
                                             <Grid.ColumnDefinitions>
@@ -56,13 +56,25 @@
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
 
-                                            <!-- 标题 -->
-                                            <TextBlock Text="{TemplateBinding Title}" VerticalAlignment="Center" Style="{DynamicResource WindowHeaderTitle}"
+                                            <Grid Grid.Column="0" HorizontalAlignment="Left">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- 标题 -->
+                                                <TextBlock Grid.Column="0" Text="{TemplateBinding Title}" VerticalAlignment="Center" Margin="10,0,0,0" Style="{DynamicResource WindowHeaderTitle}"
                                                    DataContext="{TemplateBinding IsTitleVisible}"
                                                    Visibility="{Binding Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
+                                                <!-- Logo -->
+                                                <Image Grid.Column="1" Source="{TemplateBinding LogoPath, Converter={StaticResource PathToImageConverter}}" Margin="10,0,0,0"  Width="{TemplateBinding LogoWidth}" Height="{TemplateBinding LogoHeight}" Visibility="{TemplateBinding IsLogoVisible, Converter={StaticResource BooleanToVisibilityConverter}}"></Image>
+                                               
+                                            </Grid>
+                                            
+                                           
                                             <!-- 系统按钮(关闭/最大化/最小化)-->
-                                            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Top" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" shell:WindowChrome.IsHitTestVisibleInChrome="True">
                                                 <Button Command="{Binding Source={x:Static shell:SystemCommands.MinimizeWindowCommand}}" ToolTip="{x:Static dxui:Resources.Minimize}" Style="{DynamicResource WindowHeaderSysBtn}">
                                                     <Button.Content>
                                                         <Grid Width="13" Height="12" RenderTransform="1,0,0,1,0,1">
