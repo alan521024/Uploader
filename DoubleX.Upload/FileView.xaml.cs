@@ -144,6 +144,7 @@ namespace DoubleX.Upload
                         ImgPath = getIconPath(item.Name, isDirectory: item.IsDirectory)
                     });
                 }
+                list = list.OrderByDescending(x => x.Type).ThenBy(x => x.Name).ToList();
             }
             return list;
         }
@@ -201,7 +202,7 @@ namespace DoubleX.Upload
                 case ".dll":
                     return "pack://application:,,,/Icons/dll.png";
                 case "":
-                    return "pack://application:,,,/Icons/FolderOff.png";
+                    return "pack://application:,,,/Icons/unknown.png";
                 default:
                     return "pack://application:,,,/Icons/unknown.png";
 
