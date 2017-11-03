@@ -2036,7 +2036,7 @@ namespace DoubleX.Upload
                 this.btnRegister.Visibility = Visibility.Collapsed;
                 if (ftpUtil != null && ftpUtil.IsConnection)
                 {
-                    this.btnFTPServerView.Visibility = Visibility.Collapsed;
+                    this.btnFTPServerView.Visibility = Visibility.Visible;
                 }
             }
         }
