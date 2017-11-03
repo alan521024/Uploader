@@ -1552,6 +1552,7 @@ namespace DoubleX.Upload
             }
             if (type == "mysql")
             {
+                sql=sql.Replace("\\", "\\\\");
                 result = MySqlHelper.ExecuteNonQuery(connection, sql);
             }
             if (type == "oracle")
@@ -1766,6 +1767,8 @@ namespace DoubleX.Upload
             if (VerifyHelper.IsEmpty(sql))
                 return sql;
             //{FileFullPath}->文路径径，{FileSize}->文件大小，{ServerFileFullPath}
+
+
             return sql.Replace("{FileFullPath}", taskFileEntity.FilePath).Replace("{ServerFileFullPath}", taskFileEntity.ServerFullPath).Replace("{FileSize}", taskFileEntity.FileSize.ToString())
                 .Replace("{filefullpath}", taskFileEntity.FilePath).Replace("{serverfilefullpath}", taskFileEntity.FilePath).Replace("{filesize}", taskFileEntity.FileSize.ToString())
                 .Replace("{FILEFULLPATH}", taskFileEntity.FilePath).Replace("{SERVERFILEFULLPATH}", taskFileEntity.FilePath).Replace("{FILESIZE}", taskFileEntity.FileSize.ToString());

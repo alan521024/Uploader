@@ -69,27 +69,27 @@
                                     <RowDefinition Height="auto"></RowDefinition>
                                     <RowDefinition Height="auto"></RowDefinition>
                                 </Grid.RowDefinitions>
-                                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                                <Grid Grid.Row="0" Margin="0,0,0,10" HorizontalAlignment="Stretch">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                                        <ColumnDefinition Width="*"></ColumnDefinition>
+                                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                                        <ColumnDefinition Width="auto"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <Label  Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left">连接字符串：</Label>
+                                    <TextBox Grid.Column="1" Name="txtConnectionStr" Text="Data Source=localhost;Initial Catalog=DB_Test;User Id=test;Password=123456;" Margin="0,0,0,0" Width="Auto"></TextBox>
+                                    <dxui:DxButton Grid.Column="3" x:Name="btnConnectionHelper" Margin="0" IconLeft="&#xf059;" Click="btnConnectionHelper_Click"></dxui:DxButton>
+                                    <Label Grid.Column="2"  VerticalAlignment="Center" VerticalContentAlignment="Center">
+                                        <CheckBox Name="chkDatabaseEnabled" Content="启用" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Unchecked="chkAfterEnabled_Unchecked"></CheckBox>
+                                    </Label>
+                                </Grid>
+                                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,10">
                                     <Label VerticalAlignment="Center" HorizontalAlignment="Left">数据库类型：</Label>
                                     <RadioButton Name="raSQLserver" GroupName="raDBType" Content="SQLServer" VerticalAlignment="Center" Margin="0,0,10,0" IsChecked="True"></RadioButton>
                                     <RadioButton Name="raMySql" GroupName="raDBType" Content="MySql" VerticalAlignment="Center"  Margin="0,0,10,0"></RadioButton>
                                     <RadioButton Name="raOracle" GroupName="raDBType" Content="Oracle" VerticalAlignment="Center"  Margin="0,0,10,0"></RadioButton>
                                     <RadioButton Name="raSQLite" GroupName="raDBType" Content="Sqlite" VerticalAlignment="Center"  Margin="0,0,10,0"></RadioButton>
-                                    <Label>/</Label>
-                                    <Label VerticalAlignment="Center" VerticalContentAlignment="Center">
-                                        <CheckBox Name="chkDatabaseEnabled" Content="启用" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Unchecked="chkAfterEnabled_Unchecked"></CheckBox>
-                                    </Label>
                                 </StackPanel>
-                                <Grid Grid.Row="1" Margin="0,0,0,10" HorizontalAlignment="Stretch">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="auto"></ColumnDefinition>
-                                        <ColumnDefinition Width="*"></ColumnDefinition>
-                                        <ColumnDefinition Width="auto"></ColumnDefinition>
-                                    </Grid.ColumnDefinitions>
-                                    <Label  Grid.Column="0" VerticalAlignment="Center" HorizontalAlignment="Left">连接字符串：</Label>
-                                    <TextBox Grid.Column="1" Name="txtConnectionStr" Text="Data Source=localhost;Initial Catalog=DB_Test;User Id=test;Password=123456;" Margin="0,0,0,0" Width="Auto"></TextBox>
-                                    <dxui:DxButton Grid.Column="2" x:Name="btnConnectionHelper" Margin="0" IconLeft="&#xf059;" Click="btnConnectionHelper_Click"></dxui:DxButton>
-                                </Grid>
                                 <Grid Grid.Row="2" Margin="0,0,0,10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="auto"></ColumnDefinition>
