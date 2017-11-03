@@ -24,7 +24,7 @@ namespace DoubleX.Upload.Api
 
             //返回信息
             JObject returnObj = new JObject();
-            returnObj["LastVersion"] = "1.0.0.1";
+            returnObj["LastVersion"] = "1.0.0.0";
             returnObj["CurrentVersion"] = version;
             returnObj["DownloadUrl"] = "http://www.baidu.com";
             returnObj["Incremental"] = false;
