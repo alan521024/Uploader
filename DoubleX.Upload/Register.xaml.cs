@@ -34,6 +34,21 @@ namespace DoubleX.Upload
         public Register()
         {
             InitializeComponent();
+            txtMac.Text = MacHelper.GetMacAddress();
+            txtCPU.Text= Win32Helper.GetCpuID();
+        }
+
+        private void btnOpenFileDialog_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            dlg.Multiselect = false;
+            //dlg.DefaultExt = ".txt";
+            //dlg.Filter = "Text documents (.txt)|*.txt";
+            Nullable<bool> result = dlg.ShowDialog();
+            if (result == true)
+            {
+                txtPath.Text = dlg.FileName;
+            }
         }
     }
 }

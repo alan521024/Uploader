@@ -24,6 +24,7 @@
                     <Button x:Name="btnConnectOpen"  Style="{DynamicResource Button-Primary}"  Margin="0,0,15,0" Click="btnConnectOpen_Click">快速连接(Q)</Button>
                     <Button x:Name="btnConnectClose" Visibility="Collapsed"  Style="{DynamicResource Button-Info}"  Margin="0,0,15,0" Click="btnConnectClose_Click">断开连接(C)</Button>
                     <Button x:Name="btnFTPServerView"  Visibility="Collapsed"  Style="{DynamicResource Button-Primary}"  Margin="0,0,15,0" Click="btnFTPServerView_Click">目录浏览(D)</Button>
+                    <Button Name="btnRegister" Visibility="Collapsed"  Margin="0,0,15,0" Click="btnRegister_Click">软件注册</Button>
                     <!-- 这里增加一个连接历史记录  -->
                 </StackPanel>
             </GroupBox>
@@ -230,8 +231,8 @@
                 <Grid Grid.Row="1" Margin="5,10,5,10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="80"></ColumnDefinition>
-                        <ColumnDefinition Width="100"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock>当前状态：</TextBlock>

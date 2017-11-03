@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 using Microsoft.Win32;
 using WinForm = System.Windows.Forms;
 using Newtonsoft.Json;
@@ -96,6 +97,11 @@ namespace DoubleX.Upload
             }
         }
 
+        /// <summary>
+        /// 授权信息
+        /// </summary>
+        public LicModel RegisterModel { get; set; }
+
         //上传任务
         private volatile bool uploadIsStop;
         private System.Threading.Thread uploadThread = null;
@@ -104,9 +110,9 @@ namespace DoubleX.Upload
 
         public Main()
         {
-            this.LogoPath = "pack://application:,,,/Image/acp-base-logo.png";
-
             InitializeComponent();
+            Loading();
+
             beforeParam = new List<RequestParamModel>();
             afterParam = new List<RequestParamModel>();
             InitPostParams();
@@ -114,7 +120,7 @@ namespace DoubleX.Upload
             BindTaskList();
         }
 
-        #region FTP连接/断开/浏览
+        #region FTP连接/断开/浏览/注册
 
         private void btnConnectOpen_Click(object sender, RoutedEventArgs e)
         {
@@ -158,6 +164,14 @@ namespace DoubleX.Upload
         private void btnFTPServerView_Click(object sender, RoutedEventArgs e)
         {
             FileView win = new FileView(ftpUtil);
+            win.Owner = this;
+            win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
+            win.Show();
+        }
+
+        private void btnRegister_Click(object sender, RoutedEventArgs e)
+        {
+            Register win = new Register();
             win.Owner = this;
             win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
             win.Show();
@@ -1374,7 +1388,7 @@ namespace DoubleX.Upload
                     new SQLiteParameter("@ServerFullPath", DbType.String)
             };
             parameters[0].Value = taskFileEntity.Id;
-            parameters[1].Value = taskFileEntity.BeforeResult; 
+            parameters[1].Value = taskFileEntity.BeforeResult;
             parameters[2].Value = taskFileEntity.ServerFullPath;
 
             return SQLiteHelper.ExecuteNonQuery(AppHelper.GetTaskFileDatabaseConnectionStr(destDbPath), strSql.ToString(), CommandType.Text, parameters) > 0;
@@ -1721,6 +1735,7 @@ namespace DoubleX.Upload
                 btnConnectClose.Visibility = Visibility.Collapsed;
                 btnFTPServerView.Visibility = Visibility.Collapsed;
             }
+            ShowRegisterButton(RegisterModel.IsTrial);
         }
 
         /// <summary>
@@ -1923,6 +1938,200 @@ namespace DoubleX.Upload
             return httpResult;
         }
 
+
+        #endregion
+
+        #region 辅助方法-授权文件
+
+        private void Loading()
+        {
+            var licPath = string.Format("{0}/data/license.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
+            var pubKeyPath = string.Format("{0}/data/doublex.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
+
+            if (!File.Exists(licPath))
+            {
+                if (MessageBox.Show("未找到授权文件，退出程序", "提示信息", MessageBoxButton.OK, MessageBoxImage.Question) == MessageBoxResult.OK)
+                {
+                    Application.Current.Shutdown();
+                    return;
+                }
+            }
+
+            #region 获取授权文件内容
+
+            //字符编号
+            UTF8Encoding enc = new UTF8Encoding();
+
+            //读取注册数据文件
+            StreamReader sr = new StreamReader(licPath, UTF8Encoding.UTF8);
+            string encrytText = sr.ReadToEnd();
+            sr.Close();
+            byte[] encrytBytes = System.Convert.FromBase64CharArray(encrytText.ToCharArray(), 0, encrytText.Length);
+
+            //读取公钥
+            StreamReader srPublickey = new StreamReader(pubKeyPath, UTF8Encoding.UTF8);
+            string publicKey = srPublickey.ReadToEnd();
+            srPublickey.Close();
+
+            //用公钥初化始RSACryptoServiceProvider类实例crypt。
+            RSACryptoServiceProvider crypt = new RSACryptoServiceProvider();
+            crypt.FromXmlString(AESHelper.AESDecrypt(publicKey));
+
+            int keySize = crypt.KeySize / 8;
+            byte[] buffer = new byte[keySize];
+            MemoryStream msInput = new MemoryStream(encrytBytes);
+            MemoryStream msOuput = new MemoryStream();
+            int readLen = msInput.Read(buffer, 0, keySize);
+            while (readLen > 0)
+            {
+                byte[] dataToDec = new byte[readLen];
+                Array.Copy(buffer, 0, dataToDec, 0, readLen);
+                byte[] decData = crypt.Decrypt(dataToDec, false);
+                msOuput.Write(decData, 0, decData.Length);
+                readLen = msInput.Read(buffer, 0, keySize);
+            }
+
+            msInput.Close();
+            byte[] result = msOuput.ToArray();    //得到解密结果
+            msOuput.Close();
+            crypt.Clear();
+
+            string decryptText = enc.GetString(result);
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(decryptText))
+                {
+                    RegisterModel = JsonHelper.Deserialize<LicModel>(decryptText);
+                }
+            }
+            catch (Exception ex) { };
+
+            #endregion
+
+            SetControler(RegisterModel);
+        }
+
+        private void SetControler(LicModel model)
+        {
+            var currentEdition = VeifyLicModel(model);
+
+            if (model == null || currentEdition == EnumEditionType.Default)
+            {
+                if (MessageBox.Show("未找到授权文件，退出程序", "提示信息", MessageBoxButton.OK, MessageBoxImage.Question) == MessageBoxResult.OK)
+                {
+                    Application.Current.Shutdown();
+                    return;
+                }
+            }
+
+            //注册按钮
+            ShowRegisterButton(model.IsTrial);
+
+            if (currentEdition == EnumEditionType.Default)
+            {
+                if (MessageBox.Show("授权文件验证失败，退出程序", "提示信息", MessageBoxButton.OK, MessageBoxImage.Question) == MessageBoxResult.OK)
+                {
+                    Application.Current.Shutdown();
+                    return;
+                }
+            }
+
+            if (currentEdition == EnumEditionType.Basic)
+            {
+                this.LogoPath = "pack://application:,,,/Image/acp-base-logo.png";
+
+                if (model.IsTrial)
+                {
+                    this.LogoPath = "pack://application:,,,/Image/acp-base-try-logo.png";
+                }
+                else
+                {
+
+                }
+            }
+
+            if (currentEdition == EnumEditionType.Professional)
+            {
+                this.LogoPath = "pack://application:,,,/Image/acp-pro-logo.png";
+
+                if (model.IsTrial)
+                {
+                    this.LogoPath = "pack://application:,,,/Image/acp-pro-try-logo.png";
+                }
+                else
+                {
+
+                }
+            }
+
+            //设置Logo
+        }
+
+        private EnumEditionType VeifyLicModel(LicModel model)
+        {
+            //数据验证
+            if (model == null)
+                return EnumEditionType.Default;
+
+            //产品验证
+            if (model.Product.ToLower() != "doublex.upload")
+            {
+                return EnumEditionType.Default;
+            }
+
+            //版本验证，基础/专业版
+            string[] editionArr = { EnumEditionType.Basic.ToString().ToLower(), EnumEditionType.Professional.ToString().ToLower() };
+            if (!editionArr.Contains(model.Edition.ToLower()))
+            {
+                return EnumEditionType.Default; //版本错误
+            }
+
+            //试用版数据验证
+            if (model.Email.ToLower() == "demo@demo.com" &&
+                model.Mac.ToLower() == "xx-xx-xx-xx-xx-xx" && model.Cpu.ToLower() == "xxxxxxxxxxxxxxxx" &&
+                model.Times.ToLower() == "0" && model.Date.ToLower() == "1900-01-01")
+            {
+                model.IsTrial = true;
+            }
+
+            //基础版
+            if (model.Edition.ToLower() == EnumEditionType.Basic.ToString().ToLower())
+            {
+                //非试用版，数据验证
+                if (!model.IsTrial)
+                {
+
+                }
+                return EnumEditionType.Basic;
+            }
+
+            //专业版
+            if (model.Edition.ToLower() == EnumEditionType.Professional.ToString().ToLower())
+            {
+                //非试用版，数据验证
+                if (!model.IsTrial)
+                {
+
+                }
+                return EnumEditionType.Professional;
+            }
+
+            return EnumEditionType.Default;
+        }
+
+        private void ShowRegisterButton(bool isTrial)
+        {
+            if (isTrial)
+            {
+                this.btnRegister.Visibility = Visibility.Visible;
+                this.btnFTPServerView.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                this.btnRegister.Visibility = Visibility.Collapsed;
+                this.btnFTPServerView.Visibility = Visibility.Visible;
+            }
+        }
 
         #endregion
 

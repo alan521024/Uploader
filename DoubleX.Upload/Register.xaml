@@ -7,7 +7,7 @@
         xmlns:dxui="http://doublex.com/doublexui"
         mc:Ignorable="d"
         Title="软件注册" Width="400" Height="200" ResizeMode="NoResize">
-    <Grid Margin="20">
+    <Grid Margin="10,20">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
@@ -15,45 +15,49 @@
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <Grid Grid.Row="0" Margin="20,0,20,10">
+        <Grid Grid.Row="0" Margin="15,0,15,10" HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition Width="60"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" VerticalAlignment="Center">邮箱：</TextBlock>
-            <TextBox Grid.Column="1" Name="txtEmail" Text=""></TextBox>
+            <TextBox Grid.Column="1" Name="txtEmail" Text="" Margin="0,0,0,0"></TextBox>
         </Grid>
-        <Grid Grid.Row="1" Margin="20,0,20,10">
+        <Grid Grid.Row="1" Margin="15,0,15,10"  HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition Width="60"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" VerticalAlignment="Center">Mac：</TextBlock>
-            <TextBox Grid.Column="1" Name="txtMac" Text="" ></TextBox>
+            <TextBox Grid.Column="1" Name="txtMac" Text="" IsReadOnly="True" Margin="0,0,0,0"></TextBox>
         </Grid>
-        <Grid Grid.Row="2" Margin="20,0,20,10">
+        <Grid Grid.Row="2" Margin="15,0,15,10"  HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition Width="60"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" VerticalAlignment="Center">CPU：</TextBlock>
-            <TextBox Grid.Column="1" Name="txtCPU" Text="" ></TextBox>
+            <TextBox Grid.Column="1" Name="txtCPU" Text="" IsReadOnly="True" Margin="0,0,0,0"></TextBox>
         </Grid>
-        <Grid Grid.Row="3" Margin="20,0,20,10">
+        <Grid Grid.Row="3" Margin="15,0,15,10"  HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition Width="60"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" VerticalAlignment="Center">文件：</TextBlock>
-            <TextBox Grid.Column="1" Name="txtaaa" Text="" ></TextBox>
+            <StackPanel Grid.Column="1">
+                <TextBox  Name="txtPath" IsReadOnly="True"></TextBox>
+            </StackPanel>
+            <dxui:DxButton Grid.Column="2" Name="btnOpenFileDialog" IconLeft="&#xf016;" Margin="5,0,0,0" Click="btnOpenFileDialog_Click">授权文件</dxui:DxButton>
         </Grid>
-        <Grid Grid.Row="4" Margin="20,0,20,10">
+        <Grid Grid.Row="4" Margin="15,0,15,10"  HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition Width="60"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0"></TextBlock>
-            <Button Grid.Column="1" Name="btnRegister" Content="软件注册" Width="200" ></Button>
+            <Button Grid.Column="1" Name="btnRegister" Content="软件注册"></Button>
         </Grid>
     </Grid>
 </dxui:DxWindow>
