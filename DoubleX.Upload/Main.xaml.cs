@@ -123,7 +123,17 @@ namespace DoubleX.Upload
             BindTaskPathSource();
             BindTaskList();
             Loading();
+            this.Loaded += Main_Loaded;
         }
+
+        private void Main_Loaded(object sender, RoutedEventArgs e)
+        {
+            ControlUtil.ExcuteAction(this, () => {
+                LastVerision();
+            });
+        }
+
+
 
         #region FTP连接/断开/浏览/注册
 
@@ -171,7 +181,7 @@ namespace DoubleX.Upload
             FileView win = new FileView(ftpUtil);
             win.Owner = this;
             win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
-            win.Show();
+            win.ShowDialog();
         }
 
         private void btnRegister_Click(object sender, RoutedEventArgs e)
@@ -179,7 +189,7 @@ namespace DoubleX.Upload
             Register win = new Register();
             win.Owner = this;
             win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
-            win.Show();
+            win.ShowDialog();
         }
 
         #endregion
@@ -395,7 +405,7 @@ namespace DoubleX.Upload
             DatabaseHelper win = new DatabaseHelper();
             win.Owner = this;
             win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
-            win.Show();
+            win.ShowDialog();
         }
 
 
@@ -1552,7 +1562,7 @@ namespace DoubleX.Upload
             }
             if (type == "mysql")
             {
-                sql=sql.Replace("\\", "\\\\");
+                sql = sql.Replace("\\", "\\\\");
                 result = MySqlHelper.ExecuteNonQuery(connection, sql);
             }
             if (type == "oracle")
@@ -2009,7 +2019,7 @@ namespace DoubleX.Upload
             catch (LicenseException ex)
             {
                 if (MessageBox.Show(ExceptionHelper.GetMessage(ex), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
-                { 
+                {
                     Application.Current.Shutdown();
                     return;
                 }
@@ -2040,6 +2050,47 @@ namespace DoubleX.Upload
                 if (ftpUtil != null && ftpUtil.IsConnection)
                 {
                     this.btnFTPServerView.Visibility = Visibility.Visible;
+                }
+            }
+        }
+
+        #endregion
+
+        #region 辅助方法-升级判断
+
+        protected void LastVerision()
+        {
+            var config = AppHelper.GetConfig();
+            try
+            {
+                string currentVerision = "";
+                System.Diagnostics.FileVersionInfo myFileVersion = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Windows.Forms.Application.ExecutablePath);
+                currentVerision = myFileVersion.FileVersion;
+
+                if (!VerifyHelper.IsEmpty(config) &&
+                    !VerifyHelper.IsEmpty(config.VersionUrl) &&
+                    config.VersionUrl != "#" &&
+                    (config.VersionUrl.ToLower().Contains("http://") || config.VersionUrl.ToLower().Contains("https://")))
+                {
+                    string url = string.Format("{0}{1}version={2}", config.VersionUrl.ToLower(),
+                        (config.VersionUrl.IndexOf("?") > -1 ? "&" : "?"), currentVerision);
+
+                    var verModel = JsonHelper.Deserialize<VersionModel>(GetHttp(url));
+                    if (verModel.CurrentVersion != verModel.LastVersion)
+                    {
+                        Update win = new Update(verModel);
+                        win.Owner = this;
+                        win.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        win.ShowDialog();
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                if (ControlUtil.ShowMsg(string.Format("版本校验/更新程序出错，请至官网下载最新版。({0})", config.WebUrl), "更新提示", MessageBoxButton.OK, MessageBoxImage.Warning) == MessageBoxResult.OK)
+                {
+                    Application.Current.Shutdown();
+                    return;
                 }
             }
         }

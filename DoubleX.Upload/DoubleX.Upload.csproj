@@ -125,12 +125,14 @@
     <Compile Include="Domain\Helper\MacHelper.cs" />
     <Compile Include="Domain\Helper\Win32Helper.cs" />
     <Compile Include="Domain\Model\ApiBeforeSysModel.cs" />
+    <Compile Include="Domain\Model\ConfigModel.cs" />
     <Compile Include="Domain\Model\DatabaseSettingModel.cs" />
     <Compile Include="Domain\Model\LicenseFileModel.cs" />
     <Compile Include="Domain\Model\LicenseStatModel.cs" />
     <Compile Include="Domain\Model\TaskErrorModel.cs" />
     <Compile Include="Domain\Model\RequestModel.cs" />
     <Compile Include="Domain\Model\TaskSettingModel.cs" />
+    <Compile Include="Domain\Model\VersionModel.cs" />
     <Compile Include="FileView.xaml.cs">
       <DependentUpon>FileView.xaml</DependentUpon>
     </Compile>
@@ -139,6 +141,9 @@
     </Compile>
     <Compile Include="TaskView.xaml.cs">
       <DependentUpon>TaskView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Update.xaml.cs">
+      <DependentUpon>Update.xaml</DependentUpon>
     </Compile>
     <Page Include="DatabaseHelper.xaml">
       <SubType>Designer</SubType>
@@ -179,6 +184,10 @@
     <Page Include="TaskView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Update.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
@@ -273,6 +282,11 @@
     <Resource Include="Image\acp-base-try-logo.png" />
     <Resource Include="Image\acp-pro-logo.png" />
     <Resource Include="Image\acp-pro-try-logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\config.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.105.2\build\net40\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.105.2\build\net40\System.Data.SQLite.Core.targets')" />

@@ -67,6 +67,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controller\BaseController.cs" />
+    <Compile Include="Controller\AppController.cs" />
     <Compile Include="Model\AfterRequestModel.cs" />
     <Compile Include="Model\BeforeRequestModel.cs" />
     <Compile Include="Program.cs" />

@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<ConfigModel xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <WebUrl>http://localhost:8080</WebUrl>
+  <VersionUrl>http://localhost:8080/api/app/version</VersionUrl>
+</ConfigModel>

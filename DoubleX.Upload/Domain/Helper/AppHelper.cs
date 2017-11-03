@@ -125,6 +125,33 @@ namespace DoubleX.Upload
 
         #endregion
 
+        #region 配置文件
+
+        /// <summary>
+        /// 获取配置文件
+        /// </summary>
+        /// <returns></returns>
+        public static ConfigModel GetConfig()
+        {
+            var configPath = string.Format("{0}/data/config.xml", AppDomain.CurrentDomain.BaseDirectory).ToLower();
+            ConfigModel configModel = null;
+            if (File.Exists(configPath))
+            {
+                configModel = XmlHelper.Load(typeof(ConfigModel), configPath) as ConfigModel;
+            }
+
+            if (configModel == null)
+            {
+                configModel = new ConfigModel() { VersionUrl = "#" };
+            }
+
+            //RuntimeCaching cachingHelper = new RuntimeCaching();
+            //XmlHelper.Save(configModel, configPath);
+            return configModel;
+        }
+
+        #endregion
+
         #region 授权文件/注册表 
 
         /// <summary>
