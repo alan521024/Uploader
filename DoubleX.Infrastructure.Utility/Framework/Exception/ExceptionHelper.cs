@@ -21,6 +21,20 @@ namespace DoubleX.Infrastructure.Utility
             {
                 return "";
             }
+            if (ex is LicenseException)
+            {
+                LicenseException lsEx = ex as LicenseException;
+                if (lsEx != null)
+                {
+                    StringBuilder sb = new StringBuilder();
+                    sb.AppendFormat("{0}", lsEx.ExceptionType.ToString());
+                    if (!string.IsNullOrWhiteSpace(lsEx.Message))
+                    {
+                        sb.AppendFormat("：{0}", lsEx.Message);
+                    }
+                    return sb.ToString();
+                }
+            }
             if (ex is DbEntityValidationException)
             {
                 DbEntityValidationException valEx = ex as DbEntityValidationException;

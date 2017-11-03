@@ -57,7 +57,7 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0"></TextBlock>
-            <Button Grid.Column="1" Name="btnRegister" Content="软件注册"></Button>
+            <Button Grid.Column="1" Name="btnRegister" Content="软件注册" Click="btnRegister_Click"></Button>
         </Grid>
     </Grid>
 </dxui:DxWindow>

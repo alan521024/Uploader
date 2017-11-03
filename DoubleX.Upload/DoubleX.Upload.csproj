@@ -52,6 +52,15 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <TargetZone>LocalIntranet</TargetZone>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>false</GenerateManifests>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>Properties\app.manifest</ApplicationManifest>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.0.0\lib\net40\EntityFramework.dll</HintPath>
@@ -117,7 +126,8 @@
     <Compile Include="Domain\Helper\Win32Helper.cs" />
     <Compile Include="Domain\Model\ApiBeforeSysModel.cs" />
     <Compile Include="Domain\Model\DatabaseSettingModel.cs" />
-    <Compile Include="Domain\Model\LicModel.cs" />
+    <Compile Include="Domain\Model\LicenseFileModel.cs" />
+    <Compile Include="Domain\Model\LicenseStatModel.cs" />
     <Compile Include="Domain\Model\TaskErrorModel.cs" />
     <Compile Include="Domain\Model\RequestModel.cs" />
     <Compile Include="Domain\Model\TaskSettingModel.cs" />
@@ -203,6 +213,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="Properties\app.manifest">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

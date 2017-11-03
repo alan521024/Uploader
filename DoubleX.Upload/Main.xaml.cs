@@ -100,7 +100,13 @@ namespace DoubleX.Upload
         /// <summary>
         /// 授权信息
         /// </summary>
-        public LicModel RegisterModel { get; set; }
+        private LicenseFileModel licenseFileModel { get; set; }
+
+        /// <summary>
+        /// 授权统计
+        /// </summary>
+        private LicenseStatModel licenseStatModel { get; set; }
+
 
         //上传任务
         private volatile bool uploadIsStop;
@@ -111,13 +117,12 @@ namespace DoubleX.Upload
         public Main()
         {
             InitializeComponent();
-            Loading();
-
             beforeParam = new List<RequestParamModel>();
             afterParam = new List<RequestParamModel>();
             InitPostParams();
             BindTaskPathSource();
             BindTaskList();
+            Loading();
         }
 
         #region FTP连接/断开/浏览/注册
@@ -1735,7 +1740,7 @@ namespace DoubleX.Upload
                 btnConnectClose.Visibility = Visibility.Collapsed;
                 btnFTPServerView.Visibility = Visibility.Collapsed;
             }
-            ShowRegisterButton(RegisterModel.IsTrial);
+            ShowRegisterButton(licenseFileModel.IsTrial);
         }
 
         /// <summary>
@@ -1945,191 +1950,94 @@ namespace DoubleX.Upload
 
         private void Loading()
         {
-            var licPath = string.Format("{0}/data/license.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
-            var pubKeyPath = string.Format("{0}/data/doublex.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
+            #region 控件初始
 
-            if (!File.Exists(licPath))
-            {
-                if (MessageBox.Show("未找到授权文件，退出程序", "提示信息", MessageBoxButton.OK, MessageBoxImage.Question) == MessageBoxResult.OK)
-                {
-                    Application.Current.Shutdown();
-                    return;
-                }
-            }
-
-            #region 获取授权文件内容
-
-            //字符编号
-            UTF8Encoding enc = new UTF8Encoding();
-
-            //读取注册数据文件
-            StreamReader sr = new StreamReader(licPath, UTF8Encoding.UTF8);
-            string encrytText = sr.ReadToEnd();
-            sr.Close();
-            byte[] encrytBytes = System.Convert.FromBase64CharArray(encrytText.ToCharArray(), 0, encrytText.Length);
-
-            //读取公钥
-            StreamReader srPublickey = new StreamReader(pubKeyPath, UTF8Encoding.UTF8);
-            string publicKey = srPublickey.ReadToEnd();
-            srPublickey.Close();
-
-            //用公钥初化始RSACryptoServiceProvider类实例crypt。
-            RSACryptoServiceProvider crypt = new RSACryptoServiceProvider();
-            crypt.FromXmlString(AESHelper.AESDecrypt(publicKey));
-
-            int keySize = crypt.KeySize / 8;
-            byte[] buffer = new byte[keySize];
-            MemoryStream msInput = new MemoryStream(encrytBytes);
-            MemoryStream msOuput = new MemoryStream();
-            int readLen = msInput.Read(buffer, 0, keySize);
-            while (readLen > 0)
-            {
-                byte[] dataToDec = new byte[readLen];
-                Array.Copy(buffer, 0, dataToDec, 0, readLen);
-                byte[] decData = crypt.Decrypt(dataToDec, false);
-                msOuput.Write(decData, 0, decData.Length);
-                readLen = msInput.Read(buffer, 0, keySize);
-            }
-
-            msInput.Close();
-            byte[] result = msOuput.ToArray();    //得到解密结果
-            msOuput.Close();
-            crypt.Clear();
-
-            string decryptText = enc.GetString(result);
-            try
-            {
-                if (!string.IsNullOrWhiteSpace(decryptText))
-                {
-                    RegisterModel = JsonHelper.Deserialize<LicModel>(decryptText);
-                }
-            }
-            catch (Exception ex) { };
+            btnFTPServerView.Visibility = Visibility.Collapsed;
+            tabDatabase.Visibility = Visibility.Collapsed;
+            tabApiBefore.Visibility = Visibility.Collapsed;
+            tabApiAfter.Visibility = Visibility.Collapsed;
 
             #endregion
 
-            SetControler(RegisterModel);
-        }
+            #region 授权信息
 
-        private void SetControler(LicModel model)
-        {
-            var currentEdition = VeifyLicModel(model);
-
-            if (model == null || currentEdition == EnumEditionType.Default)
+            try
             {
-                if (MessageBox.Show("未找到授权文件，退出程序", "提示信息", MessageBoxButton.OK, MessageBoxImage.Question) == MessageBoxResult.OK)
+                var licPath = string.Format("{0}/data/license.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
+                licenseFileModel = AppHelper.LicenseFileGet(licPath);
+                licenseStatModel = AppHelper.LicenseStatGet(licenseFileModel);
+
+                //信息校验
+                AppHelper.LicenseVerify(licenseFileModel, licenseStatModel);
+
+                //基本版设置
+                if (licenseFileModel.Edition == EnumEditionType.Basic.ToString())
+                {
+                    if (!licenseFileModel.IsTrial)
+                    {
+                        this.LogoPath = "pack://application:,,,/Image/acp-base-logo.png";
+                        tabDatabase.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        this.LogoPath = "pack://application:,,,/Image/acp-base-try-logo.png";
+                        tabDatabase.Visibility = Visibility.Visible;
+                    }
+                }
+
+                //专业版设置
+                if (licenseFileModel.Edition == EnumEditionType.Professional.ToString())
+                {
+                    if (!licenseFileModel.IsTrial)
+                    {
+                        this.LogoPath = "pack://application:,,,/Image/acp-pro-logo.png";
+                        tabDatabase.Visibility = Visibility.Visible;
+                        tabApiBefore.Visibility = Visibility.Visible;
+                        tabApiAfter.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        this.LogoPath = "pack://application:,,,/Image/acp-pro-try-logo.png";
+                        tabDatabase.Visibility = Visibility.Visible;
+                    }
+                }
+
+            }
+            catch (LicenseException ex)
+            {
+                if (MessageBox.Show(ExceptionHelper.GetMessage(ex), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
+                { 
+                    Application.Current.Shutdown();
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                if (MessageBox.Show(ExceptionHelper.GetMessage(ex), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
                 {
                     Application.Current.Shutdown();
                     return;
                 }
             }
+
+            #endregion
 
             //注册按钮
-            ShowRegisterButton(model.IsTrial);
-
-            if (currentEdition == EnumEditionType.Default)
-            {
-                if (MessageBox.Show("授权文件验证失败，退出程序", "提示信息", MessageBoxButton.OK, MessageBoxImage.Question) == MessageBoxResult.OK)
-                {
-                    Application.Current.Shutdown();
-                    return;
-                }
-            }
-
-            if (currentEdition == EnumEditionType.Basic)
-            {
-                this.LogoPath = "pack://application:,,,/Image/acp-base-logo.png";
-
-                if (model.IsTrial)
-                {
-                    this.LogoPath = "pack://application:,,,/Image/acp-base-try-logo.png";
-                }
-                else
-                {
-
-                }
-            }
-
-            if (currentEdition == EnumEditionType.Professional)
-            {
-                this.LogoPath = "pack://application:,,,/Image/acp-pro-logo.png";
-
-                if (model.IsTrial)
-                {
-                    this.LogoPath = "pack://application:,,,/Image/acp-pro-try-logo.png";
-                }
-                else
-                {
-
-                }
-            }
-
-            //设置Logo
-        }
-
-        private EnumEditionType VeifyLicModel(LicModel model)
-        {
-            //数据验证
-            if (model == null)
-                return EnumEditionType.Default;
-
-            //产品验证
-            if (model.Product.ToLower() != "doublex.upload")
-            {
-                return EnumEditionType.Default;
-            }
-
-            //版本验证，基础/专业版
-            string[] editionArr = { EnumEditionType.Basic.ToString().ToLower(), EnumEditionType.Professional.ToString().ToLower() };
-            if (!editionArr.Contains(model.Edition.ToLower()))
-            {
-                return EnumEditionType.Default; //版本错误
-            }
-
-            //试用版数据验证
-            if (model.Email.ToLower() == "demo@demo.com" &&
-                model.Mac.ToLower() == "xx-xx-xx-xx-xx-xx" && model.Cpu.ToLower() == "xxxxxxxxxxxxxxxx" &&
-                model.Times.ToLower() == "0" && model.Date.ToLower() == "1900-01-01")
-            {
-                model.IsTrial = true;
-            }
-
-            //基础版
-            if (model.Edition.ToLower() == EnumEditionType.Basic.ToString().ToLower())
-            {
-                //非试用版，数据验证
-                if (!model.IsTrial)
-                {
-
-                }
-                return EnumEditionType.Basic;
-            }
-
-            //专业版
-            if (model.Edition.ToLower() == EnumEditionType.Professional.ToString().ToLower())
-            {
-                //非试用版，数据验证
-                if (!model.IsTrial)
-                {
-
-                }
-                return EnumEditionType.Professional;
-            }
-
-            return EnumEditionType.Default;
+            ShowRegisterButton(licenseFileModel.IsTrial);
         }
 
         private void ShowRegisterButton(bool isTrial)
         {
-            if (isTrial)
-            {
-                this.btnRegister.Visibility = Visibility.Visible;
-                this.btnFTPServerView.Visibility = Visibility.Collapsed;
-            }
-            else
+            this.btnRegister.Visibility = Visibility.Visible;
+            this.btnFTPServerView.Visibility = Visibility.Collapsed;
+
+            if (!isTrial)
             {
                 this.btnRegister.Visibility = Visibility.Collapsed;
-                this.btnFTPServerView.Visibility = Visibility.Visible;
+                if (ftpUtil != null && ftpUtil.IsConnection)
+                {
+                    this.btnFTPServerView.Visibility = Visibility.Collapsed;
+                }
             }
         }
 

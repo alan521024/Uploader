@@ -5,7 +5,10 @@ using System.Text;
 
 namespace DoubleX.Upload
 {
-    public class LicModel
+    /// <summary>
+    /// 授权文件
+    /// </summary>
+    public class LicenseFileModel
     {
         /// <summary>
         /// 产品标识

@@ -23,6 +23,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using DoubleX.Infrastructure.Utility;
 using DoubleXUI.Controls;
+using System.Security.Cryptography;
 
 namespace DoubleX.Upload
 {
@@ -120,6 +121,258 @@ namespace DoubleX.Upload
                 }
             }
             return model;
+        }
+
+        #endregion
+
+        #region 授权文件/注册表 
+
+        /// <summary>
+        ///授权文件获取
+        /// </summary>
+        public static LicenseFileModel LicenseFileGet(string path)
+        {
+            if (!File.Exists(path))
+            {
+                throw new LicenseException(LicenseExceptionType.授权文件不存在);
+            }
+
+            //授权信息
+            LicenseFileModel model = null;
+
+            //公钥路径
+            var pubKeyPath = string.Format("{0}/data/doublex.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
+
+            //字符编号
+            UTF8Encoding enc = new UTF8Encoding();
+
+            //读取注册数据文件
+            StreamReader sr = new StreamReader(path, UTF8Encoding.UTF8);
+            string encrytText = sr.ReadToEnd();
+            sr.Close();
+            byte[] encrytBytes = System.Convert.FromBase64CharArray(encrytText.ToCharArray(), 0, encrytText.Length);
+
+            //读取公钥
+            StreamReader srPublickey = new StreamReader(pubKeyPath, UTF8Encoding.UTF8);
+            string publicKey = srPublickey.ReadToEnd();
+            srPublickey.Close();
+
+            //用公钥初化始RSACryptoServiceProvider类实例crypt。
+            RSACryptoServiceProvider crypt = new RSACryptoServiceProvider();
+            crypt.FromXmlString(AESHelper.AESDecrypt(publicKey));
+
+            int keySize = crypt.KeySize / 8;
+            byte[] buffer = new byte[keySize];
+            MemoryStream msInput = new MemoryStream(encrytBytes);
+            MemoryStream msOuput = new MemoryStream();
+            int readLen = msInput.Read(buffer, 0, keySize);
+            while (readLen > 0)
+            {
+                byte[] dataToDec = new byte[readLen];
+                Array.Copy(buffer, 0, dataToDec, 0, readLen);
+                byte[] decData = crypt.Decrypt(dataToDec, false);
+                msOuput.Write(decData, 0, decData.Length);
+                readLen = msInput.Read(buffer, 0, keySize);
+            }
+
+            msInput.Close();
+            byte[] result = msOuput.ToArray();    //得到解密结果
+            msOuput.Close();
+            crypt.Clear();
+
+            string decryptText = enc.GetString(result);
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(decryptText))
+                {
+                    model = JsonHelper.Deserialize<LicenseFileModel>(decryptText);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new LicenseException(LicenseExceptionType.授权文件内容错误);
+            };
+            return model;
+        }
+
+        /// <summary>
+        /// 授权统计获取
+        /// </summary>
+        /// <param name="isAddSelf"></param>
+        /// <returns></returns>
+        public static LicenseStatModel LicenseStatGet(LicenseFileModel licenseFileModel, bool isAddSelf = true)
+        {
+            if (licenseFileModel == null || (licenseFileModel != null && VerifyHelper.IsEmpty(licenseFileModel.Email)))
+                throw new LicenseException(LicenseExceptionType.授权信息错误);
+
+            LicenseStatModel model = new LicenseStatModel();
+
+            RegisterUtil reg = new RegisterUtil("software\\DxUpload\\");
+            if (!reg.IsSubKeyExist())
+            {
+                reg.CreateSubKey("software\\DxUpload\\");
+            }
+
+            object identificationItem = reg.ReadRegeditKey("identification");
+            if (identificationItem == null)
+            {
+                model.Identification = licenseFileModel.Email;
+                reg.WriteRegeditKey("identification", licenseFileModel.Email);
+            }
+            else
+            {
+                model.Identification = StringHelper.Get(identificationItem);
+            }
+
+            object countItem = reg.ReadRegeditKey("count");
+            if (countItem == null)
+            {
+                model.Count = 0;
+            }
+            else
+            {
+                model.Count = LongHelper.Get(countItem);
+            }
+
+            if (isAddSelf)
+            {
+                model.Count = model.Count + 1;
+                reg.WriteRegeditKey("count", model.Count);
+            }
+
+            object creatItem = reg.ReadRegeditKey("creat");
+            if (creatItem == null)
+            {
+                model.Create = DateTime.Now;
+                reg.WriteRegeditKey("creat", model.Create);
+            }
+            else
+            {
+                model.Create = DateTimeHelper.Get(creatItem);
+            }
+
+            model.Mac = MacHelper.GetMacAddress();
+            model.Cpu = Win32Helper.GetCpuID();
+
+            return model;
+        }
+
+        /// <summary>
+        /// 授权统计重置
+        /// </summary>
+        public static void LicenseStatReset(LicenseFileModel licenseFileModel)
+        {
+            if (licenseFileModel == null || (licenseFileModel != null && VerifyHelper.IsEmpty(licenseFileModel.Email)))
+                throw new LicenseException(LicenseExceptionType.授权信息错误);
+
+            RegisterUtil reg = new RegisterUtil("software\\DxUpload\\");
+            if (!reg.IsSubKeyExist())
+            {
+                reg.CreateSubKey("software\\DxUpload\\");
+            }
+
+            reg.WriteRegeditKey("identification", licenseFileModel.Email);
+            reg.WriteRegeditKey("count", 1);
+            reg.WriteRegeditKey("creat", DateTime.Now);
+        }
+
+        /// <summary>
+        /// 授权文件验证
+        /// </summary>
+        public static bool LicenseVerify(LicenseFileModel fileModel, LicenseStatModel statModel)
+        {
+            //数据验证
+            if (fileModel == null || statModel == null)
+            {
+                throw new LicenseException(LicenseExceptionType.授权文件内容错误);
+            }
+
+            //产品验证
+            if (fileModel.Product.ToLower() != "doublex.upload")
+            {
+                throw new LicenseException(LicenseExceptionType.授权产品错误);
+            }
+
+            //版本标识
+            string basicTag = EnumEditionType.Basic.ToString().ToLower(), professionalTag = EnumEditionType.Professional.ToString().ToLower();
+            var currentEdition = fileModel.Edition.ToLower();
+
+            //版本验证，基础/专业版
+            if (!(currentEdition == basicTag || currentEdition == professionalTag))
+            {
+                throw new LicenseException(LicenseExceptionType.授权版本错误);
+            }
+
+            //试用版数据验证
+            if (fileModel.IsTrial)
+            {
+                //是否试用授权文件
+                if (!(fileModel.Email.ToLower() == "demo@demo.com" && fileModel.Mac.ToLower() == "xx-xx-xx-xx-xx-xx" && fileModel.Cpu.ToLower() == "xxxxxxxxxxxxxxxx"))
+                {
+                    throw new LicenseException(LicenseExceptionType.授权试用错误);
+                }
+
+                //是否可继续试用(判断时间及次数)
+                var maxCount = LongHelper.Get(fileModel.Times);
+                if (maxCount > 0 && statModel.Count > maxCount)
+                {
+                    throw new LicenseException(LicenseExceptionType.授权试用次数超出);
+                }
+
+                //可以通过http获取在线时间（防止更改时间）
+                var curDate = DateTime.Now;
+                var minDate = DateTimeHelper.Get("1900-01-01 00:00");
+
+                //时间格式：201x-xx-xx（指定日期过期）
+                var maxDate = DateTimeHelper.Get(fileModel.Date, defaultValue: minDate);
+                if (maxDate > minDate && curDate > DateTimeHelper.GetEnd(maxDate))
+                {
+                    throw new LicenseException(LicenseExceptionType.授权试用过期);
+                }
+
+                //时间格式：2 (安装后1天过期)
+                var maxDate2 = IntHelper.Get(fileModel.Date);
+                if (maxDate2 > 0 && curDate > DateTimeHelper.GetEnd(curDate.AddDays(maxDate2)))
+                {
+                    throw new LicenseException(LicenseExceptionType.授权试用过期);
+                }
+
+                //试用分版本(暂不分版本) 
+                ////基础版
+                //if (currentEdition == basicTag)
+                //{
+                //}
+
+                ////专业版
+                //if (currentEdition == professionalTag)
+                //{
+                //}
+            }
+            else
+            {
+                //基本信息验证
+                if (fileModel.Email != statModel.Identification ||
+                    fileModel.Mac != statModel.Mac ||
+                    fileModel.Cpu != statModel.Cpu)
+                {
+                    throw new LicenseException(LicenseExceptionType.授权信息错误);
+                }
+
+
+                //基础版
+                if (currentEdition == basicTag)
+                {
+
+                }
+
+                //专业版
+                if (currentEdition == professionalTag)
+                {
+
+                }
+            }
+
+            return true;
         }
 
         #endregion

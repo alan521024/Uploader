@@ -97,6 +97,7 @@
     <Compile Include="DataAccess\SQLite\SQLiteHelper.cs" />
     <Compile Include="DataAccess\SQLServer\SQLServerHelper.cs" />
     <Compile Include="Framework\Exception\ExceptionHelper.cs" />
+    <Compile Include="Framework\Exception\LicenseException.cs" />
     <Compile Include="Framework\Extensions\AttributeExtensions.cs" />
     <Compile Include="Framework\Extensions\CollectionExtensions.cs" />
     <Compile Include="Framework\Extensions\ExpressionExtensions.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Framework\Newtonsoft\BoolConverter.cs" />
     <Compile Include="Framework\Newtonsoft\GuidConverter.cs" />
     <Compile Include="Framework\Newtonsoft\NullableValueProvider.cs" />
+    <Compile Include="Framework\RegistryHelper.cs" />
     <Compile Include="Network\BrowserHelper.cs" />
     <Compile Include="Network\CookieHelper.cs" />
     <Compile Include="Network\FTPClientUtility.cs" />

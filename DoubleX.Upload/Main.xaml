@@ -60,7 +60,7 @@
                                 </DataGrid.Columns>
                             </DataGrid>
                         </TabItem>
-                        <TabItem Header="数据库操作">
+                        <TabItem Header="数据库操作" Name="tabDatabase">
                             <Grid Margin="20">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"></RowDefinition>
@@ -109,7 +109,7 @@
                                 </TextBlock>
                             </Grid>
                         </TabItem>
-                        <TabItem Header="上传（前）接口调用配置">
+                        <TabItem Header="上传（前）接口调用配置" Name="tabApiBefore">
                             <Grid Margin="20">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"></RowDefinition>
@@ -165,7 +165,7 @@
                                 </TextBlock>
                             </Grid>
                         </TabItem>
-                        <TabItem Header="上传（后）接口调用配置">
+                        <TabItem Header="上传（后）接口调用配置" Name="tabApiAfter">
                             <Grid Margin="20">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="auto"></RowDefinition>
