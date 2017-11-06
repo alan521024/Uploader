@@ -251,7 +251,8 @@ namespace DoubleX.Upload
             }
 
             object identificationItem = reg.ReadRegeditKey("identification");
-            if (identificationItem == null)
+            if (identificationItem == null || (!VerifyHelper.IsEmpty(identificationItem) 
+                && StringHelper.Get(identificationItem).ToLower()!= licenseFileModel.Email.ToLower()))
             {
                 model.Identification = licenseFileModel.Email;
                 reg.WriteRegeditKey("identification", licenseFileModel.Email);

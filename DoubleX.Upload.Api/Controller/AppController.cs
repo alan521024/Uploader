@@ -24,10 +24,10 @@ namespace DoubleX.Upload.Api
 
             //返回信息
             JObject returnObj = new JObject();
-            returnObj["LastVersion"] = "1.0.0.0";
-            returnObj["CurrentVersion"] = version;
-            returnObj["DownloadUrl"] = "http://www.baidu.com";
-            returnObj["Incremental"] = false;
+            returnObj["LastVersion"] = "1.0.0.0";   //服务器最新版本
+            returnObj["CurrentVersion"] = version;  //请求软件版本
+            returnObj["DownloadUrl"] = "http://www.baidu.com";   //下载地址
+            returnObj["Incremental"] = false;                    //是否强制更新
             return ToHttpResponseMessage(returnObj);
         }
     }

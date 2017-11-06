@@ -299,6 +299,8 @@ namespace DoubleX.Upload
                 var databaseModel = GetDatabaseSettingModel();
                 var setting = GetTaskSettingModel();
                 string taskId = Guid.NewGuid().ToString().ToLower();
+                string url = AppHelper.GetConfig().WebUrl;
+
                 uploadThread = new Thread(new ThreadStart(() =>
                 {
                     try
@@ -312,6 +314,14 @@ namespace DoubleX.Upload
                         //移除任务
                         DeleteTask(taskId);
                         ControlUtil.ShowMsg("任务中止");
+                    }
+                    catch (LicenseException ex)
+                    {
+                        if (MessageBox.Show(string.Format("{0}(官方网站：{1})", ExceptionHelper.GetMessage(ex), url), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
+                        {
+                            System.Diagnostics.Process.Start("explorer.exe", url);
+                            return;
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -956,10 +966,20 @@ namespace DoubleX.Upload
                             BeforeApiRequest(destDbPath, taskEntity, taskFileEntity);
 
                             //上传文件
-                            ftpUtil.Upload(taskFileEntity.FilePath, taskFileEntity.ServerFullPath, 200, (current) =>
+                            try
                             {
-                                WriteStatus(string.Format("正在上传文件：{0} ({1}/{2})", taskFileEntity.FileName, current, taskFileEntity.FileSize));
-                            });
+                                ftpUtil.Upload(taskFileEntity.FilePath, taskFileEntity.ServerFullPath, 200, (current) =>
+                                {
+                                    WriteStatus(string.Format("正在上传文件：{0} ({1}/{2})", taskFileEntity.FileName, current, taskFileEntity.FileSize));
+                                });
+                            }
+                            catch (Exception ex)
+                            {
+                                if (!setting.IsErrorGoOn)
+                                {
+                                    throw ex;
+                                }
+                            }
 
                             //上传文件后调用接口
                             AfterApiRequest(destDbPath, taskEntity, taskFileEntity);
@@ -1233,6 +1253,9 @@ namespace DoubleX.Upload
             long currentTotal = insertFileTotal;
 
             var fileModel = new FileInfo(filePath);
+
+            if (licenseFileModel.IsTrial && fileModel.Length > 100)
+                throw new LicenseException("试用版文件大小不能超过100KB", LicenseExceptionType.授权试用错误);
 
             StringBuilder strSql = new StringBuilder();
             strSql.Append("insert into TB_Files(");
@@ -2041,7 +2064,7 @@ namespace DoubleX.Upload
                         this.LogoPath = "pack://application:,,,/Image/acp-pro-try-logo.png";
                     }
 
-                    tabDatabase.Visibility = Visibility.Visible;
+                    //tabDatabase.Visibility = Visibility.Visible;
                     tabApiBefore.Visibility = Visibility.Visible;
                     tabApiAfter.Visibility = Visibility.Visible;
                 }
@@ -2052,7 +2075,7 @@ namespace DoubleX.Upload
                 if (MessageBox.Show(string.Format("{0}(官方网站：{1})", ExceptionHelper.GetMessage(ex), url), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
                 {
                     System.Diagnostics.Process.Start("explorer.exe", url);
-                      Application.Current.Shutdown();
+                    Application.Current.Shutdown();
                     return;
                 }
             }

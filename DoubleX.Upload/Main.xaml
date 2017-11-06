@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:DoubleX.Upload"
         xmlns:dxui="http://doublex.com/doublexui"
         mc:Ignorable="d"
-       Width="1120" WindowStartupLocation="CenterScreen" IsTitleVisible="False"  Title="上传工具" 
+       Width="1120" WindowStartupLocation="CenterScreen" IsTitleVisible="False"  Title="启程网络(ACF上传工具)-客户端" 
                IsLogoVisible="True" LogoWidth="345" LogoHeight="58" >
     <Grid>
         <Grid.RowDefinitions>
