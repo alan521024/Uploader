@@ -78,10 +78,10 @@ namespace DoubleX.Upload
 
             ChangeViewType();
 
-            string buyBase = AppHelper.GetConfig().BuyUrl;
-            string buyParam = string.Format("email={0}&mobile={1}&mac={2}&cpu={3}code={4}",
-                txtEmail.Text.ToLower(), txtMobile.Text.ToLower(), MacHelper.GetMacAddress(), Win32Helper.GetCpuID(), txtCode.Text);
-            string buyUrl = string.Format("{0}/{1}", buyBase, UrlsHelper.Encode(buyParam));
+            var config = AppHelper.GetConfig();
+            string buyParam = string.Format("email={0}&mobile={1}&mac={2}&cpu={3}code={4}&businesser={5}",
+                txtEmail.Text.ToLower(), txtMobile.Text.ToLower(), MacHelper.GetMacAddress(), Win32Helper.GetCpuID(), txtCode.Text, config.Businesser);
+            string buyUrl = string.Format("{0}/{1}", config.BuyUrl, UrlsHelper.Encode(buyParam));
             System.Diagnostics.Process.Start("explorer.exe", buyUrl);
         }
 

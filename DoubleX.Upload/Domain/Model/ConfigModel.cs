@@ -22,5 +22,10 @@ namespace DoubleX.Upload
         /// 购买地址
         /// </summary>
         public string BuyUrl { get; set; }
+
+        /// <summary>
+        /// 业务员推荐码
+        /// </summary>
+        public string Businesser { get; set; }
     }
 }

@@ -3,4 +3,5 @@
   <WebUrl>http://localhost:8080</WebUrl>
   <VersionUrl>http://localhost:8080/api/app/version</VersionUrl>
   <BuyUrl>http://localhost:8080/buy</BuyUrl>
+  <Businesser>10001</Businesser>
 </ConfigModel>
