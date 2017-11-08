@@ -75,8 +75,14 @@ namespace DoubleX.Upload
                 ControlUtil.ShowMsg("验证码错误");
                 return;
             }
+
             ChangeViewType();
-            System.Diagnostics.Process.Start("explorer.exe", AppHelper.GetConfig().BuyUrl);
+
+            string buyBase = AppHelper.GetConfig().BuyUrl;
+            string buyParam = string.Format("email={0}&mobile={1}&mac={2}&cpu={3}code={4}",
+                txtEmail.Text.ToLower(), txtMobile.Text.ToLower(), MacHelper.GetMacAddress(), Win32Helper.GetCpuID(), txtCode.Text);
+            string buyUrl = string.Format("{0}/{1}", buyBase, UrlsHelper.Encode(buyParam));
+            System.Diagnostics.Process.Start("explorer.exe", buyUrl);
         }
 
         private void btnOpenFileDialog_Click(object sender, RoutedEventArgs e)
@@ -150,8 +156,8 @@ namespace DoubleX.Upload
                 ViewType = "import";
                 grdBuy.Visibility = Visibility.Collapsed;
                 grdImport.Visibility = Visibility.Visible;
-                txtEmail2.Text = txtEmail.Text;
-                txtMobile2.Text = txtMobile.Text;
+                txtEmail2.Text = txtEmail.Text.ToLower();
+                txtMobile2.Text = txtMobile.Text.ToLower();
             }
             else
             {
