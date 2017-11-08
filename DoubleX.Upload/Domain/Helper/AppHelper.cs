@@ -133,8 +133,18 @@ namespace DoubleX.Upload
         /// <returns></returns>
         public static ConfigModel GetConfig()
         {
+            string cacheKey = "_cache";
+
+            RuntimeCaching cachingHelper = new RuntimeCaching();
+
+            ConfigModel configModel = cachingHelper.Get(cacheKey) as ConfigModel;
+            if (configModel != null)
+            {
+                return configModel;
+            }
+
+
             var configPath = string.Format("{0}/data/config.xml", AppDomain.CurrentDomain.BaseDirectory).ToLower();
-            ConfigModel configModel = null;
             if (File.Exists(configPath))
             {
                 configModel = XmlHelper.Load(typeof(ConfigModel), configPath) as ConfigModel;
@@ -145,8 +155,8 @@ namespace DoubleX.Upload
                 configModel = new ConfigModel() { VersionUrl = "#" };
             }
 
-            //RuntimeCaching cachingHelper = new RuntimeCaching();
-            //XmlHelper.Save(configModel, configPath);
+            cachingHelper.Set<ConfigModel>(cacheKey, configModel);
+
             return configModel;
         }
 
@@ -359,7 +369,7 @@ namespace DoubleX.Upload
 
                 //时间格式：2 (安装后1天过期)
                 var maxDate2 = IntHelper.Get(fileModel.Date);
-                if (maxDate2 > 0 && curDate > DateTimeHelper.GetEnd(curDate.AddDays(maxDate2)))
+                if (maxDate2 > 0 && curDate > DateTimeHelper.GetEnd(statModel.Create.AddDays(maxDate2)))
                 {
                     throw new LicenseException(LicenseExceptionType.授权试用过期);
                 }

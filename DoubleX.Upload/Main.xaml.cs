@@ -117,6 +117,7 @@ namespace DoubleX.Upload
         public Main()
         {
             InitializeComponent();
+            VerifyConfig();
             beforeParam = new List<RequestParamModel>();
             afterParam = new List<RequestParamModel>();
             InitPostParams();
@@ -128,12 +129,11 @@ namespace DoubleX.Upload
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
         {
-            ControlUtil.ExcuteAction(this, () => {
+            ControlUtil.ExcuteAction(this, () =>
+            {
                 LastVerision();
             });
         }
-
-
 
         #region FTP连接/断开/浏览/注册
 
@@ -407,7 +407,6 @@ namespace DoubleX.Upload
             win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
             win.ShowDialog();
         }
-
 
         private void chkBeforeEnabled_Unchecked(object sender, RoutedEventArgs e)
         {
@@ -1959,6 +1958,36 @@ namespace DoubleX.Upload
 
         #endregion
 
+        #region 辅助方法-配置校验
+
+        private void VerifyConfig()
+        {
+            ConfigModel config = null;
+
+            try
+            {
+                config = AppHelper.GetConfig();
+                if (config == null)
+                {
+                    if (MessageBox.Show("软件配置信息错误", "系统错误", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
+                    {
+                        Application.Current.Shutdown();
+                        return;
+                    }
+                }
+            }
+            catch
+            {
+                if (MessageBox.Show("软件配置信息错误", "系统错误", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
+                {
+                    Application.Current.Shutdown();
+                    return;
+                }
+            }
+        }
+
+        #endregion
+
         #region 辅助方法-授权文件
 
         private void Loading()
@@ -1973,6 +2002,8 @@ namespace DoubleX.Upload
             #endregion
 
             #region 授权信息
+
+            string url = AppHelper.GetConfig().WebUrl;
 
             try
             {
@@ -1989,13 +2020,13 @@ namespace DoubleX.Upload
                     if (!licenseFileModel.IsTrial)
                     {
                         this.LogoPath = "pack://application:,,,/Image/acp-base-logo.png";
-                        tabDatabase.Visibility = Visibility.Visible;
                     }
                     else
                     {
                         this.LogoPath = "pack://application:,,,/Image/acp-base-try-logo.png";
-                        tabDatabase.Visibility = Visibility.Visible;
                     }
+
+                    tabDatabase.Visibility = Visibility.Visible;
                 }
 
                 //专业版设置
@@ -2004,30 +2035,32 @@ namespace DoubleX.Upload
                     if (!licenseFileModel.IsTrial)
                     {
                         this.LogoPath = "pack://application:,,,/Image/acp-pro-logo.png";
-                        tabDatabase.Visibility = Visibility.Visible;
-                        tabApiBefore.Visibility = Visibility.Visible;
-                        tabApiAfter.Visibility = Visibility.Visible;
                     }
                     else
                     {
                         this.LogoPath = "pack://application:,,,/Image/acp-pro-try-logo.png";
-                        tabDatabase.Visibility = Visibility.Visible;
                     }
+
+                    tabDatabase.Visibility = Visibility.Visible;
+                    tabApiBefore.Visibility = Visibility.Visible;
+                    tabApiAfter.Visibility = Visibility.Visible;
                 }
 
             }
             catch (LicenseException ex)
             {
-                if (MessageBox.Show(ExceptionHelper.GetMessage(ex), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
+                if (MessageBox.Show(string.Format("{0}(官方网站：{1})", ExceptionHelper.GetMessage(ex), url), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
                 {
-                    Application.Current.Shutdown();
+                    System.Diagnostics.Process.Start("explorer.exe", url);
+                      Application.Current.Shutdown();
                     return;
                 }
             }
             catch (Exception ex)
             {
-                if (MessageBox.Show(ExceptionHelper.GetMessage(ex), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
+                if (MessageBox.Show(string.Format("{0}(官方网站：{1})", ExceptionHelper.GetMessage(ex), url), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
                 {
+                    System.Diagnostics.Process.Start("explorer.exe", url);
                     Application.Current.Shutdown();
                     return;
                 }
@@ -2085,7 +2118,7 @@ namespace DoubleX.Upload
                     }
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 if (ControlUtil.ShowMsg(string.Format("版本校验/更新程序出错，请至官网下载最新版。({0})", config.WebUrl), "更新提示", MessageBoxButton.OK, MessageBoxImage.Warning) == MessageBoxResult.OK)
                 {
