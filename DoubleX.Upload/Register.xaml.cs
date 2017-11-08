@@ -97,6 +97,57 @@ namespace DoubleX.Upload
             }
         }
 
+        private void btnImport_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtEmail2.Text))
+            {
+                ControlUtil.ShowMsg("请输入邮箱地址");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(txtMobile2.Text))
+            {
+                ControlUtil.ShowMsg("请输入手机号码");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(txtPath.Text))
+            {
+                ControlUtil.ShowMsg("请选择授权文件");
+                return;
+            }
+
+            string email = txtEmail2.Text.Trim(), mobile=txtMobile2.Text.Trim(), mac = MacHelper.GetMacAddress(), cpu = Win32Helper.GetCpuID();
+            var licPath = txtPath.Text.Trim();
+
+            try
+            {
+                licenseFileModel = AppHelper.LicenseFileGet(licPath);
+                licenseStatModel = AppHelper.LicenseStatGet(licenseFileModel, isAddSelf: false);
+                licenseStatModel.Identification = licenseFileModel.Email;
+                licenseStatModel.Mobile = licenseFileModel.Mobile;
+
+                if (AppHelper.LicenseVerify(licenseFileModel, licenseStatModel))
+                {
+                    AppHelper.LicenseStatReset(licenseFileModel);
+                }
+                //替换文件
+                var destPath = string.Format("{0}/data/license.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
+                File.Copy(licPath, destPath, true);
+                if (MessageBox.Show("授权成功，重启程序生效", "授权提示", MessageBoxButton.OK, MessageBoxImage.Question) == MessageBoxResult.OK)
+                {
+                    System.Windows.Forms.Application.Restart();
+                    Application.Current.Shutdown();
+                    return;
+                }
+            }
+            catch (LicenseException ex)
+            {
+                ControlUtil.ShowMsg(ExceptionHelper.GetMessage(ex), "授权提示", icon: MessageBoxImage.Error);
+            }
+            catch (Exception ex)
+            {
+                ControlUtil.ShowMsg(ExceptionHelper.GetMessage(ex), "授权提示", icon: MessageBoxImage.Error);
+            }
+        }
 
         #region 私有变量
 

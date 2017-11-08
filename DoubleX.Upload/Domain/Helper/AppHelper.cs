@@ -239,8 +239,15 @@ namespace DoubleX.Upload
         /// <returns></returns>
         public static LicenseStatModel LicenseStatGet(LicenseFileModel licenseFileModel, bool isAddSelf = true)
         {
-            if (licenseFileModel == null || (licenseFileModel != null && VerifyHelper.IsEmpty(licenseFileModel.Email)))
+            if (licenseFileModel == null)
                 throw new LicenseException(LicenseExceptionType.授权信息错误);
+
+            if (VerifyHelper.IsEmpty(licenseFileModel.Email))
+                throw new LicenseException(LicenseExceptionType.授权信息错误);
+
+            if (VerifyHelper.IsEmpty(licenseFileModel.Mobile))
+                throw new LicenseException(LicenseExceptionType.授权信息错误);
+            
 
             LicenseStatModel model = new LicenseStatModel();
 
@@ -255,12 +262,25 @@ namespace DoubleX.Upload
                 && StringHelper.Get(identificationItem).ToLower()!= licenseFileModel.Email.ToLower()))
             {
                 model.Identification = licenseFileModel.Email;
-                reg.WriteRegeditKey("identification", licenseFileModel.Email);
+                reg.WriteRegeditKey("identification", licenseFileModel.Email.ToLower());
             }
             else
             {
                 model.Identification = StringHelper.Get(identificationItem);
             }
+
+            object mobileItem = reg.ReadRegeditKey("mobile");
+            if (mobileItem == null || (!VerifyHelper.IsEmpty(mobileItem)
+                && StringHelper.Get(mobileItem).ToLower() != licenseFileModel.Mobile.ToLower()))
+            {
+                model.Mobile = licenseFileModel.Mobile;
+                reg.WriteRegeditKey("mobile", licenseFileModel.Mobile.ToLower());
+            }
+            else
+            {
+                model.Mobile = StringHelper.Get(mobileItem);
+            }
+
 
             object countItem = reg.ReadRegeditKey("count");
             if (countItem == null)
@@ -300,7 +320,13 @@ namespace DoubleX.Upload
         /// </summary>
         public static void LicenseStatReset(LicenseFileModel licenseFileModel)
         {
-            if (licenseFileModel == null || (licenseFileModel != null && VerifyHelper.IsEmpty(licenseFileModel.Email)))
+            if (licenseFileModel == null)
+                throw new LicenseException(LicenseExceptionType.授权信息错误);
+
+            if (VerifyHelper.IsEmpty(licenseFileModel.Email))
+                throw new LicenseException(LicenseExceptionType.授权信息错误);
+
+            if (VerifyHelper.IsEmpty(licenseFileModel.Mobile))
                 throw new LicenseException(LicenseExceptionType.授权信息错误);
 
             RegisterUtil reg = new RegisterUtil("software\\DxUpload\\");
@@ -309,7 +335,8 @@ namespace DoubleX.Upload
                 reg.CreateSubKey("software\\DxUpload\\");
             }
 
-            reg.WriteRegeditKey("identification", licenseFileModel.Email);
+            reg.WriteRegeditKey("identification", licenseFileModel.Email.ToLower());
+            reg.WriteRegeditKey("mobile", licenseFileModel.Mobile.ToLower());
             reg.WriteRegeditKey("count", 1);
             reg.WriteRegeditKey("creat", DateTime.Now);
         }
@@ -345,7 +372,7 @@ namespace DoubleX.Upload
             if (fileModel.IsTrial)
             {
                 //是否试用授权文件
-                if (!(fileModel.Email.ToLower() == "demo@demo.com" && fileModel.Mac.ToLower() == "xx-xx-xx-xx-xx-xx" && fileModel.Cpu.ToLower() == "xxxxxxxxxxxxxxxx"))
+                if (!(fileModel.Email.ToLower() == "demo@demo.com" && fileModel.Mac.ToLower() == "xx-xx-xx-xx-xx-xx" && fileModel.Cpu.ToLower() == "xxxxxxxxxxxxxxxx" && fileModel.Mobile.ToLower() == "xxxxxxxxxxx"))
                 {
                     throw new LicenseException(LicenseExceptionType.授权试用错误);
                 }
@@ -390,6 +417,7 @@ namespace DoubleX.Upload
             {
                 //基本信息验证
                 if (fileModel.Email != statModel.Identification ||
+                    fileModel.Mobile != statModel.Mobile ||
                     fileModel.Mac != statModel.Mac ||
                     fileModel.Cpu != statModel.Cpu)
                 {

@@ -97,7 +97,7 @@
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"></TextBlock>
-                <Button Grid.Column="1" Name="btnImport" Content="授权注册"></Button>
+                <Button Grid.Column="1" Name="btnImport" Content="授权注册" Click="btnImport_Click"></Button>
                 <TextBlock Grid.Column="2" Name="swCaptch2" Text="[购买授权文件]" Foreground="#FFC2C3C3" VerticalAlignment="Bottom" Margin="5,0,0,0" MouseLeftButtonDown="swCaptch_MouseLeftButtonDown"></TextBlock>
             </Grid>
         </Grid>

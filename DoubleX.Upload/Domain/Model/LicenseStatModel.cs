@@ -8,6 +8,9 @@ namespace DoubleX.Upload
     public class LicenseStatModel
     {
         public string Identification { get; set; }
+
+        public string Mobile { get; set; }
+
         public long Count { get; set; }
         public DateTime Create { get; set; }
         public string Mac { get; set; }

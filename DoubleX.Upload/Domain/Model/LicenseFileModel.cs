@@ -26,6 +26,11 @@ namespace DoubleX.Upload
         public string Email { get; set; }
 
         /// <summary>
+        /// 注册手机
+        /// </summary>
+        public string Mobile { get; set; }
+
+        /// <summary>
         /// 机器Mac地址
         /// </summary>
         public string Mac { get; set; }
