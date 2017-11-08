@@ -47,6 +47,7 @@
     <Reference Include="Oracle.ManagedDataAccess, Version=4.122.1.0, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
       <HintPath>..\packages\Oracle.ManagedDataAccess.12.2.1100\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -61,6 +62,7 @@
     <Reference Include="System.Data.SQLite.Linq, Version=1.0.105.2, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Data.SQLite.Linq.1.0.105.2\lib\net40\System.Data.SQLite.Linq.dll</HintPath>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -68,6 +70,7 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Caching\AbsCaching.cs" />
@@ -77,6 +80,7 @@
     <Compile Include="Config\ConfigHelper.cs" />
     <Compile Include="Converter\AryHelper.cs" />
     <Compile Include="Converter\BoolHelper.cs" />
+    <Compile Include="Converter\CaptchaHelper.cs" />
     <Compile Include="Converter\ConvertHelper.cs" />
     <Compile Include="Converter\DateTimeHelper.cs" />
     <Compile Include="Converter\DecimalHelper.cs" />
