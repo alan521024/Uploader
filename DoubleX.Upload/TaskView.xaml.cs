@@ -59,8 +59,10 @@ namespace DoubleX.Upload
 
             this.Title = string.Format("上传记录（{0}）", TaskModel.TaskName);
             TaskSetting = JsonHelper.Deserialize<TaskSettingModel>(TaskModel.SettingJSON);
-
-            BindTaskFile(PageSize, 1);
+            if (!VerifyHelper.IsEmpty(TaskSetting.FileDatabasePath) && File.Exists(string.Format("{0}/{1}", AppHelper.DatabasePath,TaskSetting.FileDatabasePath)))
+            {
+                BindTaskFile(PageSize, 1);
+            }
         }
 
 

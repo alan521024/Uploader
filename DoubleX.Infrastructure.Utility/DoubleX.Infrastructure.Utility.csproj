@@ -102,6 +102,7 @@
     <Compile Include="Framework\Extensions\CollectionExtensions.cs" />
     <Compile Include="Framework\Extensions\ExpressionExtensions.cs" />
     <Compile Include="Framework\FileAndDirectory\DllHelper.cs" />
+    <Compile Include="Framework\FileAndDirectory\FileHelper.cs" />
     <Compile Include="Framework\FileAndDirectory\HtmlsHelper.cs" />
     <Compile Include="Framework\FileAndDirectory\PathHelper.cs" />
     <Compile Include="Framework\FileAndDirectory\ResourceHelper.cs" />

@@ -909,14 +909,17 @@ namespace DoubleX.Upload
             WriteLog("正在添加文件数据信息");
             WriteStatus("正在添加文件数据信息");
 
+            //更新任务记录数据库配置置
             string destDbPath = CopyFileLogTempateDB(taskId);
-            long optFileTotal = IsertTaskPaths(destDbPath, taskEntity, taskPathSource);
+            setting.FileDatabasePath = destDbPath.Replace(AppHelper.DatabasePath, "");
+            taskEntity.SettingJSON = JsonHelper.Serialize(setting);
+            UpdateTaskSetting(taskEntity);
 
+
+            //处理待上传文件
+            long optFileTotal = IsertTaskPaths(destDbPath, taskEntity, taskPathSource);
             if (optFileTotal == taskEntity.FileTotal)
             {
-                setting.FileDatabasePath = destDbPath.Replace(AppHelper.DatabasePath, "");
-                taskEntity.SettingJSON = JsonHelper.Serialize(setting);
-                UpdateTaskSetting(taskEntity);
                 WriteLog(string.Format("文件数据添加成功 ({0})", taskEntity.TaskName), UILogType.Success);
             }
             else
@@ -1252,10 +1255,11 @@ namespace DoubleX.Upload
         {
             long currentTotal = insertFileTotal;
 
-            var fileModel = new FileInfo(filePath);
+            #region 先增加任务数据记录
 
-            if (licenseFileModel.IsTrial && fileModel.Length > 100)
-                throw new LicenseException("试用版文件大小不能超过100KB", LicenseExceptionType.授权试用错误);
+            var fileModel = new FileInfo(filePath);
+            var fileSize = fileModel.Length / 1024.0;  //字节转KB
+            fileSize = fileSize < 1 ? 1 : fileSize;
 
             StringBuilder strSql = new StringBuilder();
             strSql.Append("insert into TB_Files(");
@@ -1278,7 +1282,7 @@ namespace DoubleX.Upload
             parameters[0].Value = Guid.NewGuid().ToString().ToLower();
             parameters[1].Value = taskEntity.Id;
             parameters[2].Value = filePath;
-            parameters[3].Value = fileModel.Length;
+            parameters[3].Value = fileSize;
             parameters[4].Value = fileModel.Name;
             parameters[5].Value = fileModel.Extension;
             parameters[6].Value = GetServerFileFullPath(filePath.Replace(fileModel.Name, ""), fileModel.Name);
@@ -1299,7 +1303,14 @@ namespace DoubleX.Upload
                     WriteLog(string.Format("文件数据添加失败：{0}({1})", filePath, taskEntity.TaskName), UILogType.Error);
                 }));
             }
+
+            #endregion
+
             insertFileTotal++;
+
+            if (licenseFileModel.IsTrial && fileSize > 100)
+                throw new LicenseException("试用版文件大小不能超过100KB", LicenseExceptionType.授权试用错误);
+
         }
 
 
