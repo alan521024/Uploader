@@ -58,21 +58,39 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"></RowDefinition>
                 <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
-            <Grid Grid.Row="0"  HorizontalAlignment="Left"  Margin="0,0,0,10">
+            <Grid Grid.Row="0" HorizontalAlignment="Left"  Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" VerticalAlignment="Center">邮箱：</TextBlock>
+                <TextBox Grid.Column="1" Name="txtEmail2" Text="" Margin="0"></TextBox>
+            </Grid>
+            <Grid Grid.Row="1" HorizontalAlignment="Left"  Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="60"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" VerticalAlignment="Center">手机：</TextBlock>
+                <TextBox Grid.Column="1" Name="txtMobile2" Text="" Margin="0"></TextBox>
+            </Grid>
+            <Grid Grid.Row="3"  HorizontalAlignment="Left"  Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="60"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center">文件：</TextBlock>
+                <TextBlock Grid.Column="0" VerticalAlignment="Center">授权文件：</TextBlock>
                 <StackPanel Grid.Column="1">
                     <TextBox  Name="txtPath" IsReadOnly="True"></TextBox>
                 </StackPanel>
-                <dxui:DxButton Grid.Column="2" Name="btnOpenFileDialog" IconLeft="&#xf093;" Margin="5,0,0,0" Click="btnOpenFileDialog_Click">授权文件</dxui:DxButton>
+                <dxui:DxButton Grid.Column="2" Name="btnOpenFileDialog" IconLeft="&#xf093;" Margin="5,0,0,0" Click="btnOpenFileDialog_Click">选择文件</dxui:DxButton>
             </Grid>
-            <Grid Grid.Row="1" HorizontalAlignment="Left"  Margin="0,0,0,10">
+            <Grid Grid.Row="4" HorizontalAlignment="Left"  Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="60"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>

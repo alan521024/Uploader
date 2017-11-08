@@ -40,6 +40,58 @@ namespace DoubleX.Upload
             LoadingLicense();
         }
 
+        private void imgCaptcha_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            BindCaptchaCode();
+        }
+
+        private void swCaptch_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 1)
+            {
+                ChangeViewType();
+            }
+        }
+
+        private void btnBuy_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtEmail.Text))
+            {
+                ControlUtil.ShowMsg("请输入邮箱地址");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(txtMobile.Text))
+            {
+                ControlUtil.ShowMsg("请输入手机号码");
+                return;
+            }
+            if (string.IsNullOrWhiteSpace(txtCode.Text))
+            {
+                ControlUtil.ShowMsg("请输入验证码");
+                return;
+            }
+            if (txtCode.Text != CaptchaCode)
+            {
+                ControlUtil.ShowMsg("验证码错误");
+                return;
+            }
+            ChangeViewType();
+            System.Diagnostics.Process.Start("explorer.exe", AppHelper.GetConfig().BuyUrl);
+        }
+
+        private void btnOpenFileDialog_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
+            dlg.Multiselect = false;
+            dlg.DefaultExt = ".key";
+            Nullable<bool> result = dlg.ShowDialog();
+            if (result == true)
+            {
+                txtPath.Text = dlg.FileName;
+            }
+        }
+
+
         #region 私有变量
 
         /// <summary>
@@ -56,7 +108,7 @@ namespace DoubleX.Upload
         /// 验证码
         /// </summary>
         private string CaptchaCode { get; set; }
-        
+
         /// <summary>
         /// 视图类型
         /// </summary>
@@ -91,46 +143,26 @@ namespace DoubleX.Upload
             });
         }
 
+        protected void ChangeViewType()
+        {
+            if (ViewType == "buy")
+            {
+                ViewType = "import";
+                grdBuy.Visibility = Visibility.Collapsed;
+                grdImport.Visibility = Visibility.Visible;
+                txtEmail2.Text = txtEmail.Text;
+                txtMobile2.Text = txtMobile.Text;
+            }
+            else
+            {
+                ViewType = "buy";
+                BindCaptchaCode();
+                grdBuy.Visibility = Visibility.Visible;
+                grdImport.Visibility = Visibility.Collapsed;
+            }
+        }
+
         #endregion
 
-        private void imgCaptcha_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            BindCaptchaCode();
-        }
-
-        private void swCaptch_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ClickCount == 1)
-            {
-                if (ViewType == "buy")
-                {
-                    ViewType = "import";
-                    grdBuy.Visibility = Visibility.Collapsed;
-                    grdImport.Visibility = Visibility.Visible;
-                }
-                else
-                {
-                    ViewType = "buy";
-                    grdBuy.Visibility = Visibility.Visible;
-                    grdImport.Visibility = Visibility.Collapsed;
-                }
-            }
-        }
-
-        private void btnBuy_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-        private void btnOpenFileDialog_Click(object sender, RoutedEventArgs e)
-        {
-            Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
-            dlg.Multiselect = false;
-            dlg.DefaultExt = ".key";
-            Nullable<bool> result = dlg.ShowDialog();
-            if (result == true)
-            {
-                txtPath.Text = dlg.FileName;
-            }
-        }
     }
 }

@@ -17,5 +17,10 @@ namespace DoubleX.Upload
         /// 版本校验Url
         /// </summary>
         public string VersionUrl { get; set; }
+
+        /// <summary>
+        /// 购买地址
+        /// </summary>
+        public string BuyUrl { get; set; }
     }
 }
