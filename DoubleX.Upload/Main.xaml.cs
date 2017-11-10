@@ -1259,8 +1259,7 @@ namespace DoubleX.Upload
             #region 先增加任务数据记录
 
             var fileModel = new FileInfo(filePath);
-            var fileSize = fileModel.Length / 1024.0;  //字节转KB
-            fileSize = fileSize < 1 ? 1 : fileSize;
+            var fileSize = Math.Ceiling(fileModel.Length / 1024.0); //转KB,出现小数不管多少，向前进1，
 
             StringBuilder strSql = new StringBuilder();
             strSql.Append("insert into TB_Files(");
@@ -1810,7 +1809,7 @@ namespace DoubleX.Upload
             if (!string.IsNullOrWhiteSpace(selectFolderPath))
             {
                 var tempPath = fileModel.FullName.Replace(selectFolderPath, "").Replace("\\", "/");
-                tempPath = string.Format("{0}{1}/", serverPathValue, tempPath);
+                return string.Format("{0}{1}", serverPathValue, tempPath).Replace("//", "/");
             }
             return string.Format("{0}{1}", serverPathValue, fileModel.Name);
         }
