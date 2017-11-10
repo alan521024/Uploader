@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Net;
 using System.Globalization;
+using FluentFTP;
 
 namespace DoubleX.Infrastructure.Utility
 {
@@ -206,7 +207,7 @@ namespace DoubleX.Infrastructure.Utility
         #region 信息获取
 
         /// <summary>
-        /// 获取文件大小
+        /// 获取文件大小(字节)
         /// </summary>
         public long GetServerFileSize(string path)
         {
@@ -250,71 +251,91 @@ namespace DoubleX.Infrastructure.Utility
         public List<FileStruct> GetServerList(string path)
         {
             List<FileStruct> list = new List<FileStruct>();
-            string[] dataArray = new string[] { };
+            #region FTP 目录内容列表获取(原方式，己注释，linux文件信息解析有问题)
 
-            FtpWebResponse response = null;
-            StreamReader stream = null;
+            //List<FileStruct> list = new List<FileStruct>();
+            //string[] dataArray = new string[] { };
 
-            #region FTP 目录内容列表获取
+            //FtpWebResponse response = null;
+            //StreamReader stream = null;
 
-            try
-            {
-                FtpWebRequest request = GetFTPRequest(path);
-                request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
-                using (response = (FtpWebResponse)request.GetResponse())
-                {
-                    using (stream = new StreamReader(response.GetResponseStream()))
-                    {
-                        string dataStr = stream.ReadToEnd();
-                        if (!string.IsNullOrWhiteSpace(dataStr))
-                        {
-                            dataArray = dataStr.Split('\n');
-                        }
-                        stream.Close();
-                    }
-                    response.Close();
-                }
-            }
-            catch (Exception ex) { }
-            finally
-            {
-                if (response != null && response.StatusCode == FtpStatusCode.ConnectionClosed)
-                {
-                    response.Close();
-                }
-                if (stream != null)
-                {
-                    stream.Close();
-                }
-            }
+            //try
+            //{
+            //    FtpWebRequest request = GetFTPRequest(path);
+            //    request.Method = WebRequestMethods.Ftp.ListDirectoryDetails;
+            //    using (response = (FtpWebResponse)request.GetResponse())
+            //    {
+            //        using (stream = new StreamReader(response.GetResponseStream()))
+            //        {
+            //            string dataStr = stream.ReadToEnd();
+            //            if (!string.IsNullOrWhiteSpace(dataStr))
+            //            {
+            //                dataArray = dataStr.Split('\n');
+            //            }
+            //            stream.Close();
+            //        }
+            //        response.Close();
+            //    }
+            //}
+            //catch (Exception ex) { }
+            //finally
+            //{
+            //    if (response != null && response.StatusCode == FtpStatusCode.ConnectionClosed)
+            //    {
+            //        response.Close();
+            //    }
+            //    if (stream != null)
+            //    {
+            //        stream.Close();
+            //    }
+            //}
+
+            //#endregion
+
+            //#region FTP 目录内容处理
+
+            //FileListStyle _directoryListStyle = GuessFileListStyle(dataArray);
+            //foreach (string s in dataArray)
+            //{
+            //    if (_directoryListStyle != FileListStyle.Unknown && s != "")
+            //    {
+            //        FileStruct f = new FileStruct();
+            //        f.Name = "..";
+            //        switch (_directoryListStyle)
+            //        {
+            //            case FileListStyle.UnixStyle:
+            //                f = ParseFileStructFromUnixStyleRecord(s);
+            //                break;
+            //            case FileListStyle.WindowsStyle:
+            //                f = ParseFileStructFromWindowsStyleRecord(s);
+            //                break;
+            //        }
+            //        if (!(f.Name == "." || f.Name == ".."))
+            //        {
+            //            list.Add(f);
+            //        }
+            //    }
+            //}
 
             #endregion
 
-            #region FTP 目录内容处理
-
-            FileListStyle _directoryListStyle = GuessFileListStyle(dataArray);
-            foreach (string s in dataArray)
+            FtpClient client = new FtpClient(ClientModel.Address, ClientModel.Port, ClientModel.Name, ClientModel.Password);
+            client.Connect();
+            foreach (FtpListItem item in client.GetListing(path))
             {
-                if (_directoryListStyle != FileListStyle.Unknown && s != "")
+                FileStruct struce = new FileStruct();
+                struce.Name = item.Name;
+                struce.IsDirectory = item.Type != FtpFileSystemObjectType.File;
+                if (item.Type == FtpFileSystemObjectType.File)
                 {
-                    FileStruct f = new FileStruct();
-                    f.Name = "..";
-                    switch (_directoryListStyle)
-                    {
-                        case FileListStyle.UnixStyle:
-                            f = ParseFileStructFromUnixStyleRecord(s);
-                            break;
-                        case FileListStyle.WindowsStyle:
-                            f = ParseFileStructFromWindowsStyleRecord(s);
-                            break;
-                    }
-                    if (!(f.Name == "." || f.Name == ".."))
-                    {
-                        list.Add(f);
-                    }
+                    struce.Size = client.GetFileSize(item.FullName);
                 }
+                //Flags;
+                //Owner;  //item.OwnerPermissions
+                //Group;  //item.GroupPermissions
+                struce.CreateTime= client.GetModifiedTime(item.FullName);
+                list.Add(struce);
             }
-            #endregion
 
             return list;
         }
