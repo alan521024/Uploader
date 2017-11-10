@@ -157,7 +157,7 @@ namespace DoubleX.Upload
                     adapter.adapt.adapter_address[5]);
                 }
             }
-            return addr;
+            return addr.Replace(" ", "");
         }
     }
 }

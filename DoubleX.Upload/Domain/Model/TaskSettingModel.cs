@@ -6,10 +6,15 @@ using System.Text;
 namespace DoubleX.Upload
 {
     /// <summary>
-    /// 会务设置
+    /// 任务设置
     /// </summary>
     public class TaskSettingModel
     {
+        /// <summary>
+        /// 当前任务上传根目录
+        /// </summary>
+        public string RootPath { get; set; }
+
         /// <summary>
         /// 是否启用请求前操作
         /// </summary>

@@ -828,6 +828,7 @@ namespace DoubleX.Upload
         private TaskSettingModel GetTaskSettingModel()
         {
             TaskSettingModel model = new TaskSettingModel();
+            model.RootPath = ftpUtil.ClientModel.Directory.EndsWith("/") ? ftpUtil.ClientModel.Directory : ftpUtil.ClientModel.Directory + "/";
             model.IsBefore = (chkBeforeEnabled.IsChecked == true ? true : false);
             model.IsAfter = (chkAfterEnabled.IsChecked == true ? true : false);
             model.IsErrorGoOn = (chkIsErrorGoOn.IsChecked == true ? true : false);
@@ -917,7 +918,7 @@ namespace DoubleX.Upload
 
 
             //处理待上传文件
-            long optFileTotal = IsertTaskPaths(destDbPath, taskEntity, taskPathSource);
+            long optFileTotal = IsertTaskPaths(destDbPath, taskEntity, taskPathSource, setting);
             if (optFileTotal == taskEntity.FileTotal)
             {
                 WriteLog(string.Format("文件数据添加成功 ({0})", taskEntity.TaskName), UILogType.Success);
@@ -1202,18 +1203,18 @@ namespace DoubleX.Upload
         /// </summary>
         /// <param name="taskEntity"></param>
         /// <returns></returns>
-        private long IsertTaskPaths(string destDbPath, TaskEntity taskEntity, List<TaskPathModel> pathSource)
+        private long IsertTaskPaths(string destDbPath, TaskEntity taskEntity, List<TaskPathModel> pathSource, TaskSettingModel setting)
         {
             long total = 0;
             foreach (var item in pathSource)
             {
                 if (item.ItemType == (int)EnumPathType.文件)
                 {
-                    InsertTaskFile(destDbPath, taskEntity, item.ItemPath, ref total);
+                    InsertTaskFile(destDbPath, taskEntity, setting, item.ItemPath, "", ref total);
                 }
                 else if (item.ItemType == (int)EnumPathType.文件夹)
                 {
-                    InsertTaskFolder(destDbPath, taskEntity, item.ItemPath, ref total);
+                    InsertTaskFolder(destDbPath, taskEntity, setting, item.ItemPath, item.ItemPath, ref total);
                 }
             }
             return total;
@@ -1226,7 +1227,7 @@ namespace DoubleX.Upload
         /// <param name="taskEntity"></param>
         /// <param name="folderPath"></param>
         /// <param name="insertFileTotal"></param>
-        private void InsertTaskFolder(string destDbPath, TaskEntity taskEntity, string folderPath, ref long insertFileTotal)
+        private void InsertTaskFolder(string destDbPath, TaskEntity taskEntity, TaskSettingModel setting, string folderPath, string selectFolderPath, ref long insertFileTotal)
         {
             var folders = Directory.GetDirectories(folderPath);
             var files = Directory.GetFiles(folderPath);
@@ -1234,12 +1235,12 @@ namespace DoubleX.Upload
             {
                 foreach (var item in files)
                 {
-                    InsertTaskFile(destDbPath, taskEntity, item, ref insertFileTotal);
+                    InsertTaskFile(destDbPath, taskEntity, setting, item, selectFolderPath, ref insertFileTotal);
                 }
             }
             foreach (var dir in folders)
             {
-                InsertTaskFolder(destDbPath, taskEntity, dir, ref insertFileTotal);
+                InsertTaskFolder(destDbPath, taskEntity, setting, dir, selectFolderPath, ref insertFileTotal);
             }
 
         }
@@ -1251,7 +1252,7 @@ namespace DoubleX.Upload
         /// <param name="taskEntity"></param>
         /// <param name="filePath"></param>
         /// <param name="insertFileTotal"></param>
-        private void InsertTaskFile(string destDbPath, TaskEntity taskEntity, string filePath, ref long insertFileTotal)
+        private void InsertTaskFile(string destDbPath, TaskEntity taskEntity, TaskSettingModel setting, string filePath, string selectFolderPath, ref long insertFileTotal)
         {
             long currentTotal = insertFileTotal;
 
@@ -1285,7 +1286,7 @@ namespace DoubleX.Upload
             parameters[3].Value = fileSize;
             parameters[4].Value = fileModel.Name;
             parameters[5].Value = fileModel.Extension;
-            parameters[6].Value = GetServerFileFullPath(filePath.Replace(fileModel.Name, ""), fileModel.Name);
+            parameters[6].Value = GetServerFileFullPath(taskEntity, setting, fileModel, selectFolderPath);
             parameters[7].Value = 0;
             parameters[8].Value = "";
             parameters[9].Value = (int)EnumTaskFileStatus.待上传;
@@ -1792,10 +1793,26 @@ namespace DoubleX.Upload
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="fileName"></param>
-        private string GetServerFileFullPath(string filePath, string fileName)
+        private string GetServerFileFullPath(TaskEntity taskEntity, TaskSettingModel setting, FileInfo fileModel, string selectFolderPath)
         {
-            if (ftpUtil == null || (ftpUtil != null && ftpUtil.ClientModel == null)) return fileName;
-            return string.Format("{0}{1}", ftpUtil.ClientModel.Directory, fileName);
+            if (fileModel == null)
+                return "";
+
+            if (ftpUtil == null || (ftpUtil != null && ftpUtil.ClientModel == null))
+                return fileModel.Name;
+
+            var serverPathValue = setting.RootPath;
+            if (!serverPathValue.EndsWith("/"))
+            {
+                serverPathValue = serverPathValue + "/";
+            }
+
+            if (!string.IsNullOrWhiteSpace(selectFolderPath))
+            {
+                var tempPath = fileModel.FullName.Replace(selectFolderPath, "").Replace("\\", "/");
+                tempPath = string.Format("{0}{1}/", serverPathValue, tempPath);
+            }
+            return string.Format("{0}{1}", serverPathValue, fileModel.Name);
         }
 
         /// <summary>

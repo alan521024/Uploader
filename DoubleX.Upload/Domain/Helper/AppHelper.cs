@@ -247,7 +247,7 @@ namespace DoubleX.Upload
 
             if (VerifyHelper.IsEmpty(licenseFileModel.Mobile))
                 throw new LicenseException(LicenseExceptionType.授权信息错误);
-            
+
 
             LicenseStatModel model = new LicenseStatModel();
 
@@ -258,8 +258,8 @@ namespace DoubleX.Upload
             }
 
             object identificationItem = reg.ReadRegeditKey("identification");
-            if (identificationItem == null || (!VerifyHelper.IsEmpty(identificationItem) 
-                && StringHelper.Get(identificationItem).ToLower()!= licenseFileModel.Email.ToLower()))
+            if (identificationItem == null || (!VerifyHelper.IsEmpty(identificationItem)
+                && StringHelper.Get(identificationItem).ToLower() != licenseFileModel.Email.ToLower()))
             {
                 model.Identification = licenseFileModel.Email;
                 reg.WriteRegeditKey("identification", licenseFileModel.Email.ToLower());
@@ -415,11 +415,11 @@ namespace DoubleX.Upload
             }
             else
             {
+                var fileText = string.Format("{0}{1}{2}{3}", fileModel.Email, fileModel.Mobile, fileModel.Mac, fileModel.Cpu);
+                var stateText = string.Format("{0}{1}{2}{3}", statModel.Identification, statModel.Mobile, statModel.Mac, statModel.Cpu);
+
                 //基本信息验证
-                if (fileModel.Email != statModel.Identification ||
-                    fileModel.Mobile != statModel.Mobile ||
-                    fileModel.Mac != statModel.Mac ||
-                    fileModel.Cpu != statModel.Cpu)
+                if (GetStringValueDefault(fileText) != GetStringValueDefault(stateText))
                 {
                     throw new LicenseException(LicenseExceptionType.授权信息错误);
                 }
@@ -439,6 +439,40 @@ namespace DoubleX.Upload
             }
 
             return true;
+        }
+
+        private static string GetStringValueDefault(string value)
+        {
+            if (value != null)
+            {
+                value = value.Replace(" ", "").Trim().ToLower();
+            }
+            return value;
+        }
+
+        #endregion
+
+        #region 文件相关操作
+
+        /// <summary>  
+        /// 计算文件大小函数(保留两位小数),Size为字节大小  
+        /// </summary>  
+        /// <param name="Size">初始文件大小</param>  
+        /// <returns></returns>  
+        public static string CountSize(long Size)
+        {
+            string m_strSize = "";
+            long FactSize = 0;
+            FactSize = Size;
+            if (FactSize < 1024.00)
+                m_strSize = FactSize.ToString("F2") + " Byte";
+            else if (FactSize >= 1024.00 && FactSize < 1048576)
+                m_strSize = (FactSize / 1024.00).ToString("F2") + " K";
+            else if (FactSize >= 1048576 && FactSize < 1073741824)
+                m_strSize = (FactSize / 1024.00 / 1024.00).ToString("F2") + " M";
+            else if (FactSize >= 1073741824)
+                m_strSize = (FactSize / 1024.00 / 1024.00 / 1024.00).ToString("F2") + " G";
+            return m_strSize;
         }
 
         #endregion

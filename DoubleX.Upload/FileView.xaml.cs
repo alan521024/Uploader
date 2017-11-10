@@ -45,7 +45,9 @@ namespace DoubleX.Upload
 
         private void btnGoBack_Click(object sender, RoutedEventArgs e)
         {
-            if (string.IsNullOrWhiteSpace(tbCurrentDir.Text) || tbCurrentDir.Text == "/")
+            if (string.IsNullOrWhiteSpace(tbCurrentDir.Text) ||
+                tbCurrentDir.Text == "/" ||
+                tbCurrentDir.Text.Trim().ToLower() == FtpUtil.ClientModel.Directory.Trim().ToLower())
                 return;
 
             var pathArr = tbCurrentDir.Text.Split('/');
@@ -140,7 +142,7 @@ namespace DoubleX.Upload
                         Name = item.Name,
                         Type = item.IsDirectory ? "文件夹" : "文件",
                         Path = string.Format("{0}/{1}", path, item.Name).Replace("//", "/"),
-                        Size = item.IsDirectory ? "" : item.Size + " KB",
+                        Size = item.IsDirectory ? "" : AppHelper.CountSize(item.Size),
                         ImgPath = getIconPath(item.Name, isDirectory: item.IsDirectory)
                     });
                 }
