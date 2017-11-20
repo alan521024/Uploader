@@ -24,6 +24,18 @@ using Newtonsoft.Json.Linq;
 using DoubleX.Infrastructure.Utility;
 using DoubleXUI.Controls;
 using System.Security.Cryptography;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.OpenSsl;
+using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Asn1.X509;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Math;
+using Org.BouncyCastle.X509;
+using Org.BouncyCastle.Pkcs;
+using Org.BouncyCastle.Asn1.Pkcs;
 
 namespace DoubleX.Upload
 {
@@ -187,37 +199,78 @@ namespace DoubleX.Upload
             StreamReader sr = new StreamReader(path, UTF8Encoding.UTF8);
             string encrytText = sr.ReadToEnd();
             sr.Close();
-            byte[] encrytBytes = System.Convert.FromBase64CharArray(encrytText.ToCharArray(), 0, encrytText.Length);
+            byte[] licenseBytets = System.Convert.FromBase64CharArray(encrytText.ToCharArray(), 0, encrytText.Length);
 
             //读取公钥
             StreamReader srPublickey = new StreamReader(pubKeyPath, UTF8Encoding.UTF8);
-            string publicKey = srPublickey.ReadToEnd();
+            string publicKey = AESHelper.AESDecrypt(srPublickey.ReadToEnd());
+            byte[] publicKeyBytes = Convert.FromBase64String(publicKey);
             srPublickey.Close();
 
-            //用公钥初化始RSACryptoServiceProvider类实例crypt。
-            RSACryptoServiceProvider crypt = new RSACryptoServiceProvider();
-            crypt.FromXmlString(AESHelper.AESDecrypt(publicKey));
 
-            int keySize = crypt.KeySize / 8;
-            byte[] buffer = new byte[keySize];
-            MemoryStream msInput = new MemoryStream(encrytBytes);
+            string decryptText = "";
+
+            #region PEM 格式解密
+
+            //私钥加密 
+            Asn1Object keyObj = Asn1Object.FromByteArray(publicKeyBytes);
+            AsymmetricKeyParameter keyObjParameter = PublicKeyFactory.CreateKey(SubjectPublicKeyInfo.GetInstance(keyObj));
+
+            //非对称加密算法，加解密用  
+            IAsymmetricBlockCipher engine = new RsaEngine();
+            engine.Init(false, keyObjParameter); //false表示解密  
+
+            int bufferSize = engine.GetInputBlockSize();//(engine.GetInputBlockSize() / 8) - 11;
+            byte[] buffer = new byte[bufferSize];
+            MemoryStream msInput = new MemoryStream(licenseBytets);
             MemoryStream msOuput = new MemoryStream();
-            int readLen = msInput.Read(buffer, 0, keySize);
+            int readLen = msInput.Read(buffer, 0, bufferSize);
             while (readLen > 0)
             {
                 byte[] dataToDec = new byte[readLen];
                 Array.Copy(buffer, 0, dataToDec, 0, readLen);
-                byte[] decData = crypt.Decrypt(dataToDec, false);
+                byte[] decData = engine.ProcessBlock(dataToDec, 0, dataToDec.Length);
                 msOuput.Write(decData, 0, decData.Length);
-                readLen = msInput.Read(buffer, 0, keySize);
+                readLen = msInput.Read(buffer, 0, bufferSize);
             }
 
             msInput.Close();
             byte[] result = msOuput.ToArray();    //得到解密结果
             msOuput.Close();
-            crypt.Clear();
 
-            string decryptText = enc.GetString(result);
+            decryptText = enc.GetString(result);
+
+            #endregion
+
+            #region xml格式读取
+
+            ////用公钥初化始RSACryptoServiceProvider类实例crypt。
+            //RSACryptoServiceProvider crypt = new RSACryptoServiceProvider();
+            //crypt.FromXmlString(AESHelper.AESDecrypt(publicKey));
+
+            //int keySize = crypt.KeySize / 8;
+            //byte[] buffer = new byte[keySize];
+            //MemoryStream msInput = new MemoryStream(encrytBytes);
+            //MemoryStream msOuput = new MemoryStream();
+            //int readLen = msInput.Read(buffer, 0, keySize);
+            //while (readLen > 0)
+            //{
+            //    byte[] dataToDec = new byte[readLen];
+            //    Array.Copy(buffer, 0, dataToDec, 0, readLen);
+            //    byte[] decData = crypt.Decrypt(dataToDec, false);
+            //    msOuput.Write(decData, 0, decData.Length);
+            //    readLen = msInput.Read(buffer, 0, keySize);
+            //}
+
+            //msInput.Close();
+            //byte[] result = msOuput.ToArray();    //得到解密结果
+            //msOuput.Close();
+            //crypt.Clear();
+
+            //decryptText = enc.GetString(result);
+
+            #endregion
+
             try
             {
                 if (!string.IsNullOrWhiteSpace(decryptText))
