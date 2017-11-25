@@ -2170,9 +2170,10 @@ namespace DoubleX.Upload
             }
             catch (Exception ex)
             {
-                if (ControlUtil.ShowMsg(string.Format("版本校验/更新程序出错，请至官网下载最新版。({0})", config.WebUrl), "更新提示", MessageBoxButton.OK, MessageBoxImage.Warning) == MessageBoxResult.OK)
+                if (ControlUtil.ShowMsg(string.Format("版本校验/更新出错，为保证正常使用，请至官网下载最新版。({0})", config.WebUrl), "更新提示", MessageBoxButton.OK, MessageBoxImage.Warning) == MessageBoxResult.OK)
                 {
-                    Application.Current.Shutdown();
+                    System.Diagnostics.Process.Start("explorer.exe", config.WebUrl);
+                    //Application.Current.Shutdown();
                     return;
                 }
             }

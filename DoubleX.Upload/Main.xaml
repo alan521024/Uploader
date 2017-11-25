@@ -16,10 +16,10 @@
         <StackPanel Grid.Row="0">
             <GroupBox  Margin="5,10,5,0" Header="服务器（FTP）">
                 <StackPanel Margin="5" Orientation="Horizontal">
-                    <TextBox Name="txtAddress" Text="139.196.229.64" Tag="主机(H)：" Style="{DynamicResource Label-Text-Group}" Margin="0,0,15,0"></TextBox>
+                    <TextBox Name="txtAddress" Text="" Tag="主机(H)：" Style="{DynamicResource Label-Text-Group}" Margin="0,0,15,0"></TextBox>
                     <TextBox Name="txtPort"  Text="21" Tag="端口(P)：" Width="120" Style="{DynamicResource Label-Text-Group}"  Margin="0,0,15,0"></TextBox>
-                    <TextBox Name="txtName"  Text="ftp_shdev_opt" Tag="用户名(U)：" Style="{DynamicResource Label-Text-Group}"  Margin="0,0,15,0"></TextBox>
-                    <TextBox Name="txtPassword" Text="sh" Tag="密码(P)：" Style="{DynamicResource Label-Text-Group}"  Margin="0,0,15,0"></TextBox>
+                    <TextBox Name="txtName"  Text="" Tag="用户名(U)：" Style="{DynamicResource Label-Text-Group}"  Margin="0,0,15,0"></TextBox>
+                    <TextBox Name="txtPassword" Text="" Tag="密码(P)：" Style="{DynamicResource Label-Text-Group}"  Margin="0,0,15,0"></TextBox>
                     <TextBox Name="txtDirectory" Text="/" Tag="目录(D)：" Style="{DynamicResource Label-Text-Group}"  Margin="0,0,15,0"></TextBox>
                     <Button x:Name="btnConnectOpen"  Style="{DynamicResource Button-Primary}"  Margin="0,0,15,0" Click="btnConnectOpen_Click">快速连接(Q)</Button>
                     <Button x:Name="btnConnectClose" Visibility="Collapsed"  Style="{DynamicResource Button-Info}"  Margin="0,0,15,0" Click="btnConnectClose_Click">断开连接(C)</Button>
