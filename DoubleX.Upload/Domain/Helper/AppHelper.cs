@@ -36,6 +36,7 @@ using Org.BouncyCastle.Math;
 using Org.BouncyCastle.X509;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Asn1.Pkcs;
+using Org.BouncyCastle.Crypto.Encodings;
 
 namespace DoubleX.Upload
 {
@@ -203,24 +204,34 @@ namespace DoubleX.Upload
 
             //读取公钥
             StreamReader srPublickey = new StreamReader(pubKeyPath, Coding);
-            string publicKey = AESHelper.AESDecrypt(srPublickey.ReadToEnd());
-            byte[] publicKeyBytes = Convert.FromBase64String(publicKey);
+            string publicKey = srPublickey.ReadToEnd();
+            //byte[] publicKeyBytes = Coding.GetBytes(publicKey);
             srPublickey.Close();
 
 
             string decryptText = "";
 
-            #region PEM 格式解密
+            #region (PEM Pkcs1 PHP)
 
-            //私钥加密 
-            Asn1Object keyObj = Asn1Object.FromByteArray(publicKeyBytes);
-            AsymmetricKeyParameter keyObjParameter = PublicKeyFactory.CreateKey(SubjectPublicKeyInfo.GetInstance(keyObj));
-
+            AsymmetricKeyParameter KeyPair;
+            using (var reader = new StringReader(publicKey))
+            {
+                var pemRead = new PemReader(reader).ReadObject();
+                KeyPair = pemRead as AsymmetricKeyParameter;
+            }
             //非对称加密算法，加解密用  
-            IAsymmetricBlockCipher engine = new RsaEngine();
-            engine.Init(false, keyObjParameter); //false表示解密  
+            var engine = new Pkcs1Encoding(new RsaEngine());
+            engine.Init(false, KeyPair);  //false表示解密  
 
-            int bufferSize = engine.GetInputBlockSize();//(engine.GetInputBlockSize() / 8) - 11;
+            #region 注册内容未超出长度
+
+            //decryptText = Encoding.UTF8.GetString(engine.ProcessBlock(licenseBytets, 0, licenseBytets.Length));
+
+            #endregion
+
+            #region 注册内容超出长度
+
+            int bufferSize = engine.GetInputBlockSize();
             byte[] buffer = new byte[bufferSize];
             MemoryStream msInput = new MemoryStream(licenseBytets);
             MemoryStream msOuput = new MemoryStream();
@@ -242,35 +253,8 @@ namespace DoubleX.Upload
 
             #endregion
 
-            #region xml格式读取
-
-            ////用公钥初化始RSACryptoServiceProvider类实例crypt。
-            //RSACryptoServiceProvider crypt = new RSACryptoServiceProvider();
-            //crypt.FromXmlString(AESHelper.AESDecrypt(publicKey));
-
-            //int keySize = crypt.KeySize / 8;
-            //byte[] buffer = new byte[keySize];
-            //MemoryStream msInput = new MemoryStream(encrytBytes);
-            //MemoryStream msOuput = new MemoryStream();
-            //int readLen = msInput.Read(buffer, 0, keySize);
-            //while (readLen > 0)
-            //{
-            //    byte[] dataToDec = new byte[readLen];
-            //    Array.Copy(buffer, 0, dataToDec, 0, readLen);
-            //    byte[] decData = crypt.Decrypt(dataToDec, false);
-            //    msOuput.Write(decData, 0, decData.Length);
-            //    readLen = msInput.Read(buffer, 0, keySize);
-            //}
-
-            //msInput.Close();
-            //byte[] result = msOuput.ToArray();    //得到解密结果
-            //msOuput.Close();
-            //crypt.Clear();
-
-            //decryptText = enc.GetString(result);
-
             #endregion
-
+            
             try
             {
                 if (!string.IsNullOrWhiteSpace(decryptText))
