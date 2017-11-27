@@ -41,6 +41,9 @@ namespace DoubleX.Upload
 {
     public class AppHelper
     {
+        //字符编号
+        public static Encoding Coding = new UTF8Encoding(false);
+
         #region 数据库相关
 
         /// <summary>
@@ -191,18 +194,15 @@ namespace DoubleX.Upload
 
             //公钥路径
             var pubKeyPath = string.Format("{0}/data/doublex.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
-
-            //字符编号
-            UTF8Encoding enc = new UTF8Encoding();
-
+            
             //读取注册数据文件
-            StreamReader sr = new StreamReader(path, UTF8Encoding.UTF8);
+            StreamReader sr = new StreamReader(path, Coding);
             string encrytText = sr.ReadToEnd();
             sr.Close();
             byte[] licenseBytets = System.Convert.FromBase64CharArray(encrytText.ToCharArray(), 0, encrytText.Length);
 
             //读取公钥
-            StreamReader srPublickey = new StreamReader(pubKeyPath, UTF8Encoding.UTF8);
+            StreamReader srPublickey = new StreamReader(pubKeyPath, Coding);
             string publicKey = AESHelper.AESDecrypt(srPublickey.ReadToEnd());
             byte[] publicKeyBytes = Convert.FromBase64String(publicKey);
             srPublickey.Close();
@@ -238,7 +238,7 @@ namespace DoubleX.Upload
             byte[] result = msOuput.ToArray();    //得到解密结果
             msOuput.Close();
 
-            decryptText = enc.GetString(result);
+            decryptText = Coding.GetString(result);
 
             #endregion
 
@@ -441,14 +441,14 @@ namespace DoubleX.Upload
                 var curDate = DateTime.Now;
                 var minDate = DateTimeHelper.Get("1900-01-01 00:00");
 
-                //时间格式：201x-xx-xx（指定日期过期）
+                //时间格式：字符串日期 201x-xx-xx（指定日期过期）
                 var maxDate = DateTimeHelper.Get(fileModel.Date, defaultValue: minDate);
                 if (maxDate > minDate && curDate > DateTimeHelper.GetEnd(maxDate))
                 {
                     throw new LicenseException(LicenseExceptionType.授权试用过期);
                 }
 
-                //时间格式：2 (安装后1天过期)
+                //时间格式：字符串数字 2 (安装后2天过期)
                 var maxDate2 = IntHelper.Get(fileModel.Date);
                 if (maxDate2 > 0 && curDate > DateTimeHelper.GetEnd(statModel.Create.AddDays(maxDate2)))
                 {
