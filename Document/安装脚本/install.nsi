@@ -59,7 +59,7 @@ RequestExecutionLevel admin
 
 Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
-  SetOverwrite ifnewer
+  SetOverwrite on
   File "..\..\..\..\Release\上传工具\DoubleX.Upload.exe.config"
   File "..\..\..\..\Release\上传工具\DoubleX.Upload.exe"
   SetOutPath "$INSTDIR\Bin"
