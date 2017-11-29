@@ -2155,16 +2155,19 @@ namespace DoubleX.Upload
                     config.VersionUrl != "#" &&
                     (config.VersionUrl.ToLower().Contains("http://") || config.VersionUrl.ToLower().Contains("https://")))
                 {
-                    string url = string.Format("{0}{1}version={2}", config.VersionUrl.ToLower(),
-                        (config.VersionUrl.IndexOf("?") > -1 ? "&" : "?"), currentVerision);
+                    string url = string.Format("{0}{1}version={2}&code={3}&edition={4}", config.VersionUrl.ToLower(),
+                        (config.VersionUrl.IndexOf("?") > -1 ? "&" : "?"), currentVerision, config.Businesser, licenseFileModel.Edition);
 
-                    var verModel = JsonHelper.Deserialize<VersionModel>(GetHttp(url));
-                    if (verModel.CurrentVersion != verModel.LastVersion)
-                    {
-                        Update win = new Update(verModel);
-                        win.Owner = this;
-                        win.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                        win.ShowDialog();
+                    var result = GetHttp(url);
+                    if (!VerifyHelper.IsEmpty(result)) {
+                        var verModel = JsonHelper.Deserialize<VersionModel>(result);
+                        if (verModel.CurrentVersion != verModel.LastVersion)
+                        {
+                            Update win = new Update(verModel);
+                            win.Owner = this;
+                            win.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                            win.ShowDialog();
+                        }
                     }
                 }
             }

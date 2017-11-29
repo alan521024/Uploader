@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <ConfigModel xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <WebUrl>http://acf.7-cheng.com/product</WebUrl>
-  <VersionUrl>http://acf.7-cheng.com/source/api/version</VersionUrl>
-  <BuyUrl>http://acf.7-cheng.com/product/detail?</BuyUrl>
+  <WebUrl>http://www.7-cheng.com</WebUrl>
+  <VersionUrl>http://product.7-cheng.com/version/acf</VersionUrl>
+  <BuyUrl>http://product.7-cheng.com/acf/detail?</BuyUrl>
   <Businesser>10000</Businesser>
 </ConfigModel>
