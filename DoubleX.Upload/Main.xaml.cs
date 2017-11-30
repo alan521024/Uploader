@@ -1214,7 +1214,8 @@ namespace DoubleX.Upload
                 }
                 else if (item.ItemType == (int)EnumPathType.文件夹)
                 {
-                    InsertTaskFolder(destDbPath, taskEntity, setting, item.ItemPath, item.ItemPath, ref total);
+                    var dicName = System.IO.Path.GetDirectoryName(item.ItemPath);
+                    InsertTaskFolder(destDbPath, taskEntity, setting, item.ItemPath, dicName, ref total);
                 }
             }
             return total;
