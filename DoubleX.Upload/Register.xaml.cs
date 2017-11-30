@@ -78,14 +78,20 @@ namespace DoubleX.Upload
 
             ChangeViewType();
 
-            var licPath = string.Format("{0}/data/license.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
-            licenseFileModel = AppHelper.LicenseFileGet(licPath);
-            var config = AppHelper.GetConfig();
-            string buyParam = string.Format("email={0}&mobile={1}&mac={2}&cpu={3}&code={4}&businesser={5}&edition={6}",
-                txtEmail.Text.ToLower(), txtMobile.Text.ToLower(), MacHelper.GetMacAddress(), Win32Helper.GetCpuID(), 
-                txtCode.Text, config.Businesser, licenseFileModel.Edition);
-            string buyUrl = string.Format("{0}{1}", config.BuyUrl, UrlsHelper.Encode(buyParam));
+            string buyUrl = GetBuyUrl();
             System.Diagnostics.Process.Start("explorer.exe", buyUrl);
+        }
+
+        private void swByUrl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtEmail.Text) || string.IsNullOrWhiteSpace(txtMobile.Text)
+                || string.IsNullOrWhiteSpace(txtCode.Text) || txtCode.Text != CaptchaCode)
+            {
+                ControlUtil.ShowMsg("请切换切购买界面，填写正确邮箱/手机/验证码，提交购买后再复制购买网址");
+                return;
+            }
+            Clipboard.SetText(GetBuyUrl());
+            ControlUtil.ShowMsg("地址复制成功，请在浏览器粘贴访问");
         }
 
         private void btnOpenFileDialog_Click(object sender, RoutedEventArgs e)
@@ -222,6 +228,17 @@ namespace DoubleX.Upload
             }
         }
 
+        protected string GetBuyUrl() {
+            var licPath = string.Format("{0}/data/license.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
+            licenseFileModel = AppHelper.LicenseFileGet(licPath);
+            var config = AppHelper.GetConfig();
+            string buyParam = string.Format("email={0}&mobile={1}&mac={2}&cpu={3}&code={4}&businesser={5}&edition={6}",
+                txtEmail.Text.ToLower(), txtMobile.Text.ToLower(), MacHelper.GetMacAddress(), Win32Helper.GetCpuID(),
+                txtCode.Text, config.Businesser, licenseFileModel.Edition);
+            string buyUrl = string.Format("{0}{1}", config.BuyUrl, UrlsHelper.Encode(buyParam));
+            return buyUrl;
+        }
+        
         #endregion
 
     }

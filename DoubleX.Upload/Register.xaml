@@ -50,8 +50,8 @@
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"></TextBlock>
-                <Button Grid.Column="1" Name="btnBuy" Content="授权购买" Click="btnBuy_Click"></Button>
-                <TextBlock Grid.Column="2" Name="swCaptch" Text="[导入授权文件]" Foreground="#FFC2C3C3" VerticalAlignment="Bottom" Margin="5,0,0,0" MouseLeftButtonDown="swCaptch_MouseLeftButtonDown"></TextBlock>
+                <Button Grid.Column="1" Name="btnBuy" Content="购买授权文件" Click="btnBuy_Click"></Button>
+                <TextBlock Grid.Column="2" Name="swCaptch" Text="导入授权文件" Foreground="#FFC2C3C3" VerticalAlignment="Bottom" Margin="5,0,0,0" MouseLeftButtonDown="swCaptch_MouseLeftButtonDown"></TextBlock>
             </Grid>
         </Grid>
         <Grid Name="grdImport" Visibility="Collapsed">
@@ -95,10 +95,12 @@
                     <ColumnDefinition Width="60"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0"></TextBlock>
-                <Button Grid.Column="1" Name="btnImport" Content="授权注册" Click="btnImport_Click"></Button>
-                <TextBlock Grid.Column="2" Name="swCaptch2" Text="[购买授权文件]" Foreground="#FFC2C3C3" VerticalAlignment="Bottom" Margin="5,0,0,0" MouseLeftButtonDown="swCaptch_MouseLeftButtonDown"></TextBlock>
+                <Button Grid.Column="1" Name="btnImport" Content="导入授权文件" Click="btnImport_Click"></Button>
+                <TextBlock Grid.Column="2" Name="swCaptch2" Text="购买授权文件" Foreground="#FFC2C3C3" VerticalAlignment="Bottom" Margin="5,0,0,0" MouseLeftButtonDown="swCaptch_MouseLeftButtonDown"></TextBlock>
+                <TextBlock Grid.Column="3" Name="swByUrl" Text="/ 复制购买网址" Foreground="#FFC2C3C3" VerticalAlignment="Bottom" Margin="5,0,0,0" MouseLeftButtonDown="swByUrl_MouseLeftButtonDown"></TextBlock>
             </Grid>
         </Grid>
     </StackPanel>
