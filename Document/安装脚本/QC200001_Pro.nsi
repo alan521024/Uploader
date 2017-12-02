@@ -37,7 +37,7 @@ var ICONS_GROUP
 
 !define Code "QC200001"
 !define Edition "Pro"
-;Pro
+;Air/Pro
 
 ; 安装过程页面
 !insertmacro MUI_PAGE_INSTFILES
@@ -65,6 +65,19 @@ ShowUnInstDetails show
 BrandingText " "
 RequestExecutionLevel admin
 
+Section -.NET Framework
+  ;检测是否是需要的.NET Framework版本
+  Call GetNetFrameworkVersion
+  Pop $R1
+  ;${If} $R1 < '2.0.50727'
+  ;${If} $R1 < '3.5.30729.4926'
+  ;${If} $R1 < '4.0.30319'
+	${If} $R1 < '4.5.52747'
+    MessageBox MB_YESNO|MB_ICONQUESTION "此软件运行需要.NET Framework 4.5 运行环境，但您机器上似乎没有安装此环境。$\r$\n您是否：$\r$\n1.使用此安装程序在线下载并安装.NET Framework 4.5$\r$\n2.使用百度搜索或QQ/360管家下载安装.NET Framework 4.5 $\r$\n$\r$\n是否在线下载并安装.NET Framework 4.5,请确认您的机器已连接互联网？" IDNO +2
+      Call DownloadNetFramework45
+  ${ENDIF}
+SectionEnd
+
 Section "MainSection" SEC01
 
   SetOutPath "$INSTDIR"
@@ -91,6 +104,7 @@ Section "MainSection" SEC01
   CreateShortCut "$DESKTOP\ACF上传工具.lnk" "$INSTDIR\DoubleX.Upload.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
+
 
 Section -AdditionalIcons
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
@@ -153,3 +167,57 @@ Function un.onUninstSuccess
   HideWindow
   MessageBox MB_ICONINFORMATION|MB_OK "$(^Name) 已成功地从您的计算机移除。"
 FunctionEnd
+
+
+/******************************
+ *  .NetFramework 版本测检  *
+ ******************************/
+
+Function GetNetFrameworkVersion
+;获取.Net Framework版本支持
+    Push $1
+    Push $0
+    ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" "Install"
+    ReadRegDWORD $1 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" "Version"
+    StrCmp $0 1 KnowNetFrameworkVersion +1
+    ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5" "Install"
+    ReadRegDWORD $1 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.5" "Version"
+    StrCmp $0 1 KnowNetFrameworkVersion +1
+    ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.0\Setup" "InstallSuccess"
+    ReadRegDWORD $1 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v3.0\Setup" "Version"
+    StrCmp $0 1 KnowNetFrameworkVersion +1
+    ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v2.0.50727" "Install"
+    ReadRegDWORD $1 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v2.0.50727" "Version"
+    StrCmp $1 "" +1 +2
+    StrCpy $1 "2.0.50727.832"
+    StrCmp $0 1 KnowNetFrameworkVersion +1
+    ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v1.1.4322" "Install"
+    ReadRegDWORD $1 HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v1.1.4322" "Version"
+    StrCmp $1 "" +1 +2
+    StrCpy $1 "1.1.4322.573"
+    StrCmp $0 1 KnowNetFrameworkVersion +1
+    ReadRegDWORD $0 HKLM "SOFTWARE\Microsoft\.NETFramework\policy\v1.0" "Install"
+    ReadRegDWORD $1 HKLM "SOFTWARE\Microsoft\.NETFramework\policy\v1.0" "Version"
+    StrCmp $1 "" +1 +2
+    StrCpy $1 "1.0.3705.0"
+    StrCmp $0 1 KnowNetFrameworkVersion +1
+    StrCpy $1 "not .NetFramework"
+    KnowNetFrameworkVersion:
+    Pop $0
+    Exch $1
+FunctionEnd
+
+Function DownloadNetFramework45
+;下载 .NET Framework 4.5
+  NSISdl::download /TRANSLATE2 '正在下载 %s' '正在连接...' '(剩余 1 秒)' '(剩余 1 分钟)' '(剩余 1 小时)' '(剩余 %u 秒)' '(剩余 %u 分钟)' '(剩余 %u 小时)' '已完成：%skB(%d%%) 大小：%skB 速度：%u.%01ukB/s' /TIMEOUT=7500 /NOIEPROXY 'http://download.microsoft.com/download/E/2/1/E21644B5-2DF2-47C2-91BD-63C560427900/NDP452-KB2901907-x86-x64-AllOS-ENU.exe' '$TEMP\NDP452-KB2901907-x86-x64-AllOS-ENU.exe'
+  Pop $R0
+  StrCmp $R0 "success" 0 +2
+
+  SetDetailsPrint textonly
+  DetailPrint "正在安装 .NET Framework 4.5.2 ..."
+  SetDetailsPrint listonly
+  ExecWait '$TEMP\NDP452-KB2901907-x86-x64-AllOS-ENU.exe /quiet /norestart' $R1
+  Delete "$TEMP\NDP452-KB2901907-x86-x64-AllOS-ENU.exe"
+
+FunctionEnd
+

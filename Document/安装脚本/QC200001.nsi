@@ -37,7 +37,7 @@ var ICONS_GROUP
 
 !define Code "QC200001"
 !define Edition "Air"
-;Pro
+;Air/Pro
 
 ; 安装过程页面
 !insertmacro MUI_PAGE_INSTFILES
