@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Api", "Api", "{805817E1-1A6
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DoubleX.Upload.Api", "DoubleX.Upload.Api\DoubleX.Upload.Api.csproj", "{97A0CD7C-2301-4725-BB25-4CBD56D13234}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Document", "Document", "{9CC9261B-4511-48E4-B60C-AB2A6D17EFB2}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		DoubleXUI.Shared\DoubleXUI.Shared.projitems*{a9159c9e-bd02-4330-9a68-7204634d04f5}*SharedItemsImports = 13
