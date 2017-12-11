@@ -124,7 +124,7 @@ namespace DoubleX.Upload
                 return;
             }
 
-            string email = txtEmail2.Text.Trim(), mobile=txtMobile2.Text.Trim(), mac = MacHelper.GetMacAddress(), cpu = Win32Helper.GetCpuID();
+            string email = txtEmail2.Text.Trim(), mobile = txtMobile2.Text.Trim(), mac = MacHelper.GetMacAddress(), cpu = Win32Helper.GetCpuID();
             var licPath = txtPath.Text.Trim();
 
             try
@@ -187,6 +187,10 @@ namespace DoubleX.Upload
         protected void ViewPageInit()
         {
             ViewType = "buy";
+
+            var config = AppHelper.GetConfig();
+            txtBusiness.Text = config.Businesser == "9999" ? "" : config.Businesser;
+
             BindCaptchaCode();
         }
 
@@ -228,17 +232,28 @@ namespace DoubleX.Upload
             }
         }
 
-        protected string GetBuyUrl() {
+        protected string GetBuyUrl()
+        {
             var licPath = string.Format("{0}/data/license.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
             licenseFileModel = AppHelper.LicenseFileGet(licPath);
             var config = AppHelper.GetConfig();
+            string businessCode = txtBusiness.Text;
+            if (string.IsNullOrWhiteSpace(businessCode))
+            {
+                businessCode = config.Businesser;
+            }
+            if (string.IsNullOrWhiteSpace(businessCode) || (businessCode != null && businessCode.ToString().Trim() == "10000"))
+            {
+                businessCode = "9999";
+            }
+
             string buyParam = string.Format("email={0}&mobile={1}&mac={2}&cpu={3}&code={4}&businesser={5}&edition={6}",
                 txtEmail.Text.ToLower(), txtMobile.Text.ToLower(), MacHelper.GetMacAddress(), Win32Helper.GetCpuID(),
-                txtCode.Text, config.Businesser, licenseFileModel.Edition);
+                txtCode.Text, businessCode, licenseFileModel.Edition);
             string buyUrl = string.Format("{0}{1}", config.BuyUrl, UrlsHelper.Encode(buyParam));
             return buyUrl;
         }
-        
+
         #endregion
 
     }
