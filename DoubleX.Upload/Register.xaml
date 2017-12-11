@@ -38,7 +38,7 @@
                     <ColumnDefinition Width="60"></ColumnDefinition>
                     <ColumnDefinition Width="*"></ColumnDefinition>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" VerticalAlignment="Center">业务员：</TextBlock>
+                <TextBlock Grid.Column="0" VerticalAlignment="Center">工号：</TextBlock>
                 <TextBox Grid.Column="1" Name="txtBusiness" Text="" Margin="0"></TextBox>
             </Grid>
             <Grid Grid.Row="3" HorizontalAlignment="Left"  Margin="0,0,0,10">

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<ConfigModel xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <WebUrl>http://product.7-cheng.com/acf/index.html</WebUrl>
+  <VersionUrl>http://product.7-cheng.com/version/acf</VersionUrl>
+  <BuyUrl>http://product.7-cheng.com/acf/detail?</BuyUrl>
+  <Businesser>0007</Businesser>
+</ConfigModel>
