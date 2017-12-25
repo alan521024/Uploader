@@ -13,6 +13,8 @@ namespace DoubleX.Upload.Api
         public string FileMD5 { get; set; }
         public string ServerFileFullPath { get; set; }
         public long FileSize { get; set; }
+        public string Extension { get; set; }
+        public string UpDateTime { get; set; }
         public string ExtA { get; set; }
     }
 }

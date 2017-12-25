@@ -42,7 +42,7 @@ namespace DoubleX.Upload
         /// <summary>
         /// 系统参数(小写)
         /// </summary>
-        private string[] systemParam { get { return new string[] { "id", "filefullpath", "filesize", "serverfilefullpath" }; } }
+        private string[] systemParam { get { return new string[] { "id", "filefullpath", "filesize", "serverfilefullpath", "extension", "updatetime" }; } }
 
         /// <summary>
         /// 信息参数(FTP发送前)
@@ -715,6 +715,24 @@ namespace DoubleX.Upload
                 DefaultValue = "",
                 IsCanDelete = false
             });
+            beforeList.Add(new RequestParamModel()
+            {
+                Id = Guid.NewGuid(),
+                Name = "UpDateTime",
+                PType = "string",
+                Descript = "上传时间",
+                DefaultValue = "",
+                IsCanDelete = false
+            });
+            beforeList.Add(new RequestParamModel()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Extension",
+                PType = "string",
+                Descript = "文件后缀",
+                DefaultValue = "",
+                IsCanDelete = false
+            });
             beforeParam = beforeList;
             gridRequestBefore.ItemsSource = beforeList;
 
@@ -765,8 +783,27 @@ namespace DoubleX.Upload
                 DefaultValue = "",
                 IsCanDelete = false
             });
+            afterList.Add(new RequestParamModel()
+            {
+                Id = Guid.NewGuid(),
+                Name = "Extension",
+                PType = "string",
+                Descript = "文件后缀",
+                DefaultValue = "",
+                IsCanDelete = false
+            });
+            afterList.Add(new RequestParamModel()
+            {
+                Id = Guid.NewGuid(),
+                Name = "UpDateTime",
+                PType = "string",
+                Descript = "上传时间",
+                DefaultValue = "",
+                IsCanDelete = false
+            });
             afterParam = afterList;
             gridRequestAfter.ItemsSource = afterList;
+            
         }
 
         /// <summary>
@@ -834,7 +871,7 @@ namespace DoubleX.Upload
             model.IsErrorGoOn = (chkIsErrorGoOn.IsChecked == true ? true : false);
             return model;
         }
-
+        
         #endregion
 
         #region 辅助方法-任务操作
@@ -1826,12 +1863,13 @@ namespace DoubleX.Upload
         {
             if (VerifyHelper.IsEmpty(sql))
                 return sql;
-            //{FileFullPath}->文路径径，{FileSize}->文件大小，{ServerFileFullPath}
-
-
-            return sql.Replace("{FileFullPath}", taskFileEntity.FilePath).Replace("{ServerFileFullPath}", taskFileEntity.ServerFullPath).Replace("{FileSize}", taskFileEntity.FileSize.ToString())
-                .Replace("{filefullpath}", taskFileEntity.FilePath).Replace("{serverfilefullpath}", taskFileEntity.FilePath).Replace("{filesize}", taskFileEntity.FileSize.ToString())
-                .Replace("{FILEFULLPATH}", taskFileEntity.FilePath).Replace("{SERVERFILEFULLPATH}", taskFileEntity.FilePath).Replace("{FILESIZE}", taskFileEntity.FileSize.ToString());
+            //{FileFullPath}->文路径径，{FileSize}->文件大小，{ServerFileFullPath} 文件后缀 {Extension},上传时间：{UpDateTime}
+            var currentDateTimeStr = DateTime.Now.ToString("yyyy-MM-dd HH:mm:sss");
+            return sql.Replace("{FileFullPath}", taskFileEntity.FilePath).Replace("{filefullpath}", taskFileEntity.FilePath).Replace("{FILEFULLPATH}", taskFileEntity.FilePath)
+                .Replace("{ServerFileFullPath}", taskFileEntity.ServerFullPath).Replace("{serverfilefullpath}", taskFileEntity.FilePath).Replace("{SERVERFILEFULLPATH}", taskFileEntity.FilePath)
+                .Replace("{FileSize}", taskFileEntity.FileSize.ToString()).Replace("{filesize}", taskFileEntity.FileSize.ToString()).Replace("{FILESIZE}", taskFileEntity.FileSize.ToString())
+                .Replace("{Extension}", taskFileEntity.FileExtension).Replace("{extension}", taskFileEntity.FileExtension).Replace("{EXTENSION}", taskFileEntity.FileExtension)
+                .Replace("{UpDateTime}", currentDateTimeStr).Replace("{updatetime}", currentDateTimeStr).Replace("{UPDATETIME}", currentDateTimeStr);
         }
 
         /// <summary>
@@ -1883,7 +1921,7 @@ namespace DoubleX.Upload
                     var afterSetting = JsonHelper.Deserialize<RequestModel>(taskEntity.AfterJSON);
                     param = afterSetting.Params;
                 }
-
+                
                 foreach (var item in param)
                 {
                     if (item.Name.ToLower() == "id")
@@ -1906,6 +1944,14 @@ namespace DoubleX.Upload
                     if (item.Name.ToLower() == "filesize")
                     {
                         post["FileSize"] = taskFileEntity.FileSize;
+                    }
+                    if (item.Name.ToLower() == "extension")
+                    {
+                        post["Extension"] = taskFileEntity.FileExtension;
+                    }
+                    if (item.Name.ToLower() == "updatetime")
+                    {
+                        post["UpDateTime"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:sss");
                     }
                     if (item.PType.ToLower() == "value")
                     {
