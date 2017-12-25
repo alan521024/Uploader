@@ -6,8 +6,8 @@
         xmlns:local="clr-namespace:DoubleX.Upload"
         xmlns:dxui="http://doublex.com/doublexui"
         mc:Ignorable="d"
-       Width="1120" WindowStartupLocation="CenterScreen" IsTitleVisible="False"  Title="启程网络(ACF上传工具)-客户端" 
-               IsLogoVisible="True" LogoWidth="345" LogoHeight="58" >
+       Width="1128" WindowStartupLocation="CenterScreen" IsTitleVisible="False"  Title="启程网络(ACF上传工具)-客户端" 
+               IsLogoVisible="True" LogoWidth="345" LogoHeight="58">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -24,7 +24,7 @@
                     <Button x:Name="btnConnectOpen"  Style="{DynamicResource Button-Primary}"  Margin="0,0,15,0" Click="btnConnectOpen_Click">快速连接(Q)</Button>
                     <Button x:Name="btnConnectClose" Visibility="Collapsed"  Style="{DynamicResource Button-Info}"  Margin="0,0,15,0" Click="btnConnectClose_Click">断开连接(C)</Button>
                     <Button x:Name="btnFTPServerView"  Visibility="Collapsed"  Style="{DynamicResource Button-Primary}"  Margin="0,0,15,0" Click="btnFTPServerView_Click">目录浏览(D)</Button>
-                    <Button Name="btnRegister" Visibility="Collapsed"  Margin="0,0,15,0" Click="btnRegister_Click">软件注册</Button>
+                    <Button Name="btnRegister" Visibility="Collapsed"  Margin="0,0,15,0" Click="btnRegister_Click" Style="{DynamicResource Button-Danger}">试用软件注册</Button>
                     <!-- 这里增加一个连接历史记录  -->
                 </StackPanel>
             </GroupBox>

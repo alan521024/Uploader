@@ -59,6 +59,7 @@
                                             <Grid Grid.Column="0" HorizontalAlignment="Left">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="Auto" />
+                                                    <ColumnDefinition Width="Auto" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
                                                 
@@ -69,7 +70,11 @@
 
                                                 <!-- Logo -->
                                                 <Image Grid.Column="1" Source="{TemplateBinding LogoPath, Converter={StaticResource PathToImageConverter}}" Margin="10,0,0,0"  Width="{TemplateBinding LogoWidth}" Height="{TemplateBinding LogoHeight}" Visibility="{TemplateBinding IsLogoVisible, Converter={StaticResource BooleanToVisibilityConverter}}"></Image>
-                                               
+                                                
+                                                <!-- 标题 -->
+                                                <TextBlock Grid.Column="2" Text="{TemplateBinding Descript}" VerticalAlignment="Bottom" Margin="10,0,0,18" Style="{DynamicResource WindowHeaderDescript}"
+                                                   DataContext="{TemplateBinding IsDescriptVisible}"
+                                                   Visibility="{Binding Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                             </Grid>
                                             
                                            

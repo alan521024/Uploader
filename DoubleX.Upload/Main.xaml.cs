@@ -2075,6 +2075,7 @@ namespace DoubleX.Upload
                     else
                     {
                         this.LogoPath = "pack://application:,,,/Image/acp-base-try-logo.png";
+                        this.Descript = GetTryDescript(licenseFileModel, licenseStatModel);
                     }
 
                     tabDatabase.Visibility = Visibility.Visible;
@@ -2090,6 +2091,7 @@ namespace DoubleX.Upload
                     else
                     {
                         this.LogoPath = "pack://application:,,,/Image/acp-pro-try-logo.png";
+                        this.Descript = GetTryDescript(licenseFileModel, licenseStatModel);
                     }
 
                     //tabDatabase.Visibility = Visibility.Visible;
@@ -2138,6 +2140,60 @@ namespace DoubleX.Upload
             }
         }
 
+        private string GetTryDescript(LicenseFileModel fileModel, LicenseStatModel licenseStatModel)
+        {
+            if (licenseFileModel.IsTrial)
+            {
+                this.IsDescriptVisible = true;
+            }
+            else
+            {
+                this.IsDescriptVisible = false;
+                return "";
+            }
+
+            //"基础试用版 单个文件大小100kb"
+            StringBuilder builder = new StringBuilder();
+
+            if (fileModel.Edition == EnumEditionType.Basic.ToString())
+            {
+                builder.Append("基础试用版限制：");
+            }
+            if (fileModel.Edition == EnumEditionType.Professional.ToString())
+            {
+                builder.Append("高级试用版限制：");
+            }
+
+            builder.Append("单个文件大小100kb ");
+
+            //是否可继续试用(判断时间及次数)
+            var maxCount = LongHelper.Get(fileModel.Times);
+            if (maxCount > 0)
+            {
+                builder.AppendFormat("，试用次数 {0}/{1} ", licenseStatModel.Count, maxCount);
+            }
+
+            //可以通过http获取在线时间（防止更改时间）
+            var curDate = DateTime.Now;
+            var minDate = DateTimeHelper.Get("1900-01-01 00:00");
+
+            //时间格式：字符串日期 201x-xx-xx（指定日期过期）
+            var maxDate = DateTimeHelper.Get(fileModel.Date, defaultValue: minDate);
+            if (maxDate > minDate)
+            {
+                builder.AppendFormat("，过期日期 {0} ", DateTimeHelper.GetEnd(maxDate));
+            }
+
+            //时间格式：字符串数字 2 (安装后2天过期)
+            var maxDate2 = IntHelper.Get(fileModel.Date);
+            if (maxDate2 > 0)
+            {
+                builder.AppendFormat("，过期日期 {0} ", DateTimeHelper.GetEnd(licenseStatModel.Create.AddDays(maxDate2)));
+            }
+
+            return builder.ToString();
+        }
+
         #endregion
 
         #region 辅助方法-升级判断
@@ -2160,7 +2216,8 @@ namespace DoubleX.Upload
                         (config.VersionUrl.IndexOf("?") > -1 ? "&" : "?"), currentVerision, config.Businesser, licenseFileModel.Edition);
 
                     var result = GetHttp(url);
-                    if (!VerifyHelper.IsEmpty(result)) {
+                    if (!VerifyHelper.IsEmpty(result))
+                    {
                         var verModel = JsonHelper.Deserialize<VersionModel>(result);
                         if (verModel.CurrentVersion != verModel.LastVersion)
                         {

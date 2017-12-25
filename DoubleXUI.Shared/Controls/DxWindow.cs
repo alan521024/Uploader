@@ -21,12 +21,17 @@ namespace DoubleXUI.Controls
         public static readonly DependencyProperty BackgroundContentProperty = DependencyProperty.Register("BackgroundContent", typeof(object), typeof(DxWindow));
         public static readonly DependencyProperty ContentSourceProperty = DependencyProperty.Register("ContentSource", typeof(Uri), typeof(DxWindow));
         public static readonly DependencyProperty ContentLoaderProperty = DependencyProperty.Register("ContentLoader", typeof(IContentLoader), typeof(DxWindow), new PropertyMetadata(new DefaultContentLoader()));
+
         public static readonly DependencyProperty IsTitleVisibleProperty = DependencyProperty.Register("IsTitleVisible", typeof(bool), typeof(DxWindow), new PropertyMetadata(false));
+
         public static readonly DependencyProperty IsLogoVisibleProperty = DependencyProperty.Register("IsLogoVisible", typeof(bool), typeof(DxWindow), new PropertyMetadata(false));
         public static readonly DependencyProperty LogoPathProperty = DependencyProperty.Register("LogoPath", typeof(string), typeof(DxWindow));
         public static readonly DependencyProperty LogoWidthProperty = DependencyProperty.Register("LogoWidth", typeof(double), typeof(DxWindow));
         public static readonly DependencyProperty LogoHeightProperty = DependencyProperty.Register("LogoHeight", typeof(double), typeof(DxWindow));
-        
+
+        public static readonly DependencyProperty IsDescriptVisibleProperty = DependencyProperty.Register("IsDescriptVisible", typeof(bool), typeof(DxWindow), new PropertyMetadata(false));
+        public static readonly DependencyProperty DescriptProperty = DependencyProperty.Register("Descript", typeof(string), typeof(DxWindow));
+
         public object BackgroundContent
         {
             get { return GetValue(BackgroundContentProperty); }
@@ -67,6 +72,19 @@ namespace DoubleXUI.Controls
         {
             get { return (double)GetValue(LogoHeightProperty); }
             set { SetValue(LogoPathProperty, value); }
+        }
+
+
+        public bool IsDescriptVisible
+        {
+            get { return (bool)GetValue(IsDescriptVisibleProperty); }
+            set { SetValue(IsDescriptVisibleProperty, value); }
+        }
+
+        public string Descript
+        {
+            get { return (string)GetValue(DescriptProperty); }
+            set { SetValue(DescriptProperty, value); }
         }
 
         #endregion

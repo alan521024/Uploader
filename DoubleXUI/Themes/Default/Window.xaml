@@ -54,6 +54,16 @@
         <Setter Property="FontSize" Value="16" />
     </Style>
 
+    <Style x:Key="WindowHeaderDescript" TargetType="TextBlock">
+        <Setter Property="FontWeight" Value="Bold"/>
+        <Setter Property="TextWrapping" Value="NoWrap" />
+        <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+        <Setter Property="Margin" Value="8,0" />
+        <Setter Property="Foreground" Value="{DynamicResource ColorGroupBrush10}" />
+        <Setter Property="FontSize" Value="11" />
+    </Style>
+
     <!-- 头部(系统按钮) -->
     <Style x:Key="WindowHeaderSysBtnBase" TargetType="ButtonBase">
         <Setter Property="Width" Value="{StaticResource WindowSysBtnWidth}" />
