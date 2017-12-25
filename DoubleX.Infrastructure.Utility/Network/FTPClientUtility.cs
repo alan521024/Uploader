@@ -84,7 +84,7 @@ namespace DoubleX.Infrastructure.Utility
 
             try
             {
-                request.Method = WebRequestMethods.Ftp.ListDirectory;
+                request.Method = WebRequestMethods.Ftp.MakeDirectory;
                 using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
                 {
                     IsConnection = true;
