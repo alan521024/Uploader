@@ -718,18 +718,18 @@ namespace DoubleX.Upload
             beforeList.Add(new RequestParamModel()
             {
                 Id = Guid.NewGuid(),
-                Name = "UpDateTime",
+                Name = "Extension",
                 PType = "string",
-                Descript = "上传时间",
+                Descript = "文件后缀",
                 DefaultValue = "",
                 IsCanDelete = false
             });
             beforeList.Add(new RequestParamModel()
             {
                 Id = Guid.NewGuid(),
-                Name = "Extension",
+                Name = "UpDateTime",
                 PType = "string",
-                Descript = "文件后缀",
+                Descript = "上传时间(yyyy-MM-dd HH:mm:ss)",
                 DefaultValue = "",
                 IsCanDelete = false
             });
@@ -797,7 +797,7 @@ namespace DoubleX.Upload
                 Id = Guid.NewGuid(),
                 Name = "UpDateTime",
                 PType = "string",
-                Descript = "上传时间",
+                Descript = "上传时间(yyyy-MM-dd HH:mm:ss)",
                 DefaultValue = "",
                 IsCanDelete = false
             });
@@ -1864,7 +1864,7 @@ namespace DoubleX.Upload
             if (VerifyHelper.IsEmpty(sql))
                 return sql;
             //{FileFullPath}->文路径径，{FileSize}->文件大小，{ServerFileFullPath} 文件后缀 {Extension},上传时间：{UpDateTime}
-            var currentDateTimeStr = DateTime.Now.ToString("yyyy-MM-dd HH:mm:sss");
+            var currentDateTimeStr = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
             return sql.Replace("{FileFullPath}", taskFileEntity.FilePath).Replace("{filefullpath}", taskFileEntity.FilePath).Replace("{FILEFULLPATH}", taskFileEntity.FilePath)
                 .Replace("{ServerFileFullPath}", taskFileEntity.ServerFullPath).Replace("{serverfilefullpath}", taskFileEntity.FilePath).Replace("{SERVERFILEFULLPATH}", taskFileEntity.FilePath)
                 .Replace("{FileSize}", taskFileEntity.FileSize.ToString()).Replace("{filesize}", taskFileEntity.FileSize.ToString()).Replace("{FILESIZE}", taskFileEntity.FileSize.ToString())
@@ -1951,7 +1951,7 @@ namespace DoubleX.Upload
                     }
                     if (item.Name.ToLower() == "updatetime")
                     {
-                        post["UpDateTime"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:sss");
+                        post["UpDateTime"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                     }
                     if (item.PType.ToLower() == "value")
                     {
