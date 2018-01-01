@@ -44,6 +44,10 @@ namespace DoubleX.Upload
         //先定义一个常量  
         const int PageSize = 20;
 
+        //添加一个委托
+        public delegate void AfreshTaskHandler(object sender, AfreshTaskEventArgs e);
+        //添加一个AfreshTaskHandler类型的事件
+        public event AfreshTaskHandler AfreshTaskEvent;
 
         public TaskView(TaskEntity model)
         {
@@ -64,8 +68,7 @@ namespace DoubleX.Upload
                 BindTaskFile(PageSize, 1);
             }
         }
-
-
+        
         #region 文件列表
 
         /// <summary>
@@ -145,5 +148,16 @@ namespace DoubleX.Upload
         }
 
         #endregion
+
+        #region 重新上传(仅待上传/错误)
+
+        private void btnAfreshTask_Click(object sender, RoutedEventArgs e)
+        {
+            AfreshTaskEventArgs args = new AfreshTaskEventArgs(TaskModel);
+            AfreshTaskEvent(this, args);
+            this.Close(); //释放资源，在WPF中没有此方法，用this.Close()关闭窗口
+        }
+        #endregion
+
     }
 }

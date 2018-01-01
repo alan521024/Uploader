@@ -50,6 +50,8 @@ namespace DoubleX.Infrastructure.Utility
         /// </summary>
         public bool IsConnection { get; private set; }
 
+        public FtpClient FtpClient2 { get; set; }
+
         #endregion
 
         #region 连接操作
@@ -81,7 +83,7 @@ namespace DoubleX.Infrastructure.Utility
             {
                 throw new ArgumentException("FTP Request is null");
             }
-
+            FtpWebResponse response = null;
             try
             {
                 if (VerifyHelper.IsEmpty(ClientModel.Directory) || ClientModel.Directory == "/" || ClientModel.Directory == "\\")
@@ -92,21 +94,31 @@ namespace DoubleX.Infrastructure.Utility
                 {
                     request.Method = WebRequestMethods.Ftp.MakeDirectory;
                 }
-                using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
+                using (response = (FtpWebResponse)request.GetResponse())
                 {
-                    IsConnection = true;
                     response.Close();
+                    IsConnection = true;
                 }
+                FtpClient2 = new FtpClient(ClientModel.Address, ClientModel.Port, ClientModel.Name, ClientModel.Password);
+                FtpClient2.Connect();
             }
             catch (Exception ex)
             {
                 throw ex;
+            }
+            finally
+            {
+                if (response != null)
+                {
+                    response.Close();
+                }
             }
         }
 
         public void Close()
         {
             IsConnection = false;
+            FtpClient2.Dispose();
         }
 
         #endregion
@@ -118,96 +130,102 @@ namespace DoubleX.Infrastructure.Utility
         /// </summary>
         public void Upload(string sourceFilePath, string serverFilePath, int splitSize, Action<long> action)
         {
+            var pro = new FtpProgress(action);
+            FtpClient2.UploadFile(sourceFilePath, serverFilePath, existsMode: FtpExists.Overwrite, createRemoteDir: true, progress: pro);
+
             //本地文件->流
-            FileStream fStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read);
-            BinaryReader bReader = new BinaryReader(fStream);
+            //FileStream fStream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read);
+            //BinaryReader bReader = new BinaryReader(fStream);
 
-            try
-            {
-                //处理目录
-                var dicPath = Path.GetDirectoryName(serverFilePath).Replace("\\", "/");
-                if (dicPath != "/")
-                {
-                    DirectoryMake(dicPath);
-                }
+            //try
+            //{
+            //    //处理目录
+            //    var dicPath = Path.GetDirectoryName(serverFilePath).Replace("\\", "/");
+            //    if (dicPath != "/")
+            //    {
+            //        DirectoryMake(dicPath);
+            //    }
 
-                //文件大小
-                long length = fStream.Length;
+            //    //文件大小
+            //    long length = fStream.Length;
 
-                //分割大小
-                int byteCount = splitSize * 1024; //200; 500KB
+            //    //分割大小
+            //    int byteCount = splitSize * 1024; //200; 500KB
 
-                if (byteCount > length)
-                {
-                    byteCount = (int)length;
-                }
+            //    if (byteCount > length)
+            //    {
+            //        byteCount = (int)length;
+            //    }
 
-                //开始位置,上传总大小
-                long current = 0;
+            //    //开始位置,上传总大小
+            //    long current = 0;
 
-                do
-                {
-                    //续传处理
-                    byte[] data;
+            //    do
+            //    {
+            //        //续传处理
+            //        byte[] data;
 
-                    //己上传,继传,从服务器FTP路径获取文件大小
-                    current = GetServerFileSize(serverFilePath);
+            //        //己上传,继传,从服务器FTP路径获取文件大小
+            //        //current = GetServerFileSize(serverFilePath);
 
-                    FtpWebRequest ftp = GetFTPRequest(serverFilePath);
-                    ftp.ContentLength = length;
-                    ftp.Method = WebRequestMethods.Ftp.UploadFile;
-                    if (current > 0)
-                    {
-                        ftp.Method = WebRequestMethods.Ftp.AppendFile;
-                        fStream.Seek(current, SeekOrigin.Current);
-                    }
+            //        current = FtpClient2.GetFileSize(serverFilePath);
 
-                    //把上传的文件写入流
-                    using (Stream rs = ftp.GetRequestStream())
-                    {
-                        for (; current <= length; current = current + byteCount)
-                        {
-                            long _readLength = 0;
+            //        FtpWebRequest ftp = GetFTPRequest(serverFilePath);
+            //        ftp.ContentLength = length;
+            //        ftp.Method = WebRequestMethods.Ftp.UploadFile;
+            //        if (current > 0)
+            //        {
+            //            ftp.Method = WebRequestMethods.Ftp.AppendFile;
+            //            fStream.Seek(current, SeekOrigin.Current);
+            //        }
 
-                            if (current + byteCount > length)
-                            {
-                                _readLength = length - current;
-                                data = new byte[_readLength];
-                                bReader.Read(data, 0, Convert.ToInt32(_readLength));
-                            }
-                            else
-                            {
-                                _readLength = byteCount;
-                                data = new byte[byteCount];
-                                bReader.Read(data, 0, Convert.ToInt32(_readLength));
-                            }
-                            rs.Write(data, 0, Convert.ToInt32(_readLength));
+            //        //把上传的文件写入流
+            //        using (Stream rs = ftp.GetRequestStream())
+            //        {
+            //            for (; current <= length; current = current + byteCount)
+            //            {
+            //                long _readLength = 0;
 
-                            if (action != null)
-                            {
-                                action(current + Convert.ToInt32(_readLength));
-                            }
+            //                if (current + byteCount > length)
+            //                {
+            //                    _readLength = length - current;
+            //                    data = new byte[_readLength];
+            //                    bReader.Read(data, 0, Convert.ToInt32(_readLength));
+            //                }
+            //                else
+            //                {
+            //                    _readLength = byteCount;
+            //                    data = new byte[byteCount];
+            //                    bReader.Read(data, 0, Convert.ToInt32(_readLength));
+            //                }
+            //                rs.Write(data, 0, Convert.ToInt32(_readLength));
 
-                            //文件大小为0，服务器创建文件就OK了
-                            //(不跳出的话及while不判断的话 current <= length 为 0=0 无限循环)
-                            if (length == 0)
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-                while (current < length && length > 0);
-            }
-            catch (Exception ex)
-            {
-            }
-            finally
-            {
-                bReader.Close();
-                fStream.Close();
-                GC.Collect();
-            }
+            //                if (action != null)
+            //                {
+            //                    action(current + Convert.ToInt32(_readLength));
+            //                }
+
+            //                //文件大小为0，服务器创建文件就OK了
+            //                //(不跳出的话及while不判断的话 current <= length 为 0=0 无限循环)
+            //                if (length == 0)
+            //                {
+            //                    break;
+            //                }
+            //            }
+            //        }
+            //    }
+            //    while (current < length && length > 0);
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw ex;
+            //}
+            //finally
+            //{
+            //    bReader.Close();
+            //    fStream.Close();
+            //    GC.Collect();
+            //}
         }
 
         #endregion
@@ -327,21 +345,19 @@ namespace DoubleX.Infrastructure.Utility
 
             #endregion
 
-            FtpClient client = new FtpClient(ClientModel.Address, ClientModel.Port, ClientModel.Name, ClientModel.Password);
-            client.Connect();
-            foreach (FtpListItem item in client.GetListing(path))
+            foreach (FtpListItem item in FtpClient2.GetListing(path))
             {
                 FileStruct struce = new FileStruct();
                 struce.Name = item.Name;
                 struce.IsDirectory = item.Type != FtpFileSystemObjectType.File;
                 if (item.Type == FtpFileSystemObjectType.File)
                 {
-                    struce.Size = client.GetFileSize(item.FullName);
+                    struce.Size = FtpClient2.GetFileSize(item.FullName);
                 }
                 //Flags;
                 //Owner;  //item.OwnerPermissions
                 //Group;  //item.GroupPermissions
-                struce.CreateTime = client.GetModifiedTime(item.FullName);
+                struce.CreateTime = FtpClient2.GetModifiedTime(item.FullName);
                 list.Add(struce);
             }
 
@@ -378,18 +394,22 @@ namespace DoubleX.Infrastructure.Utility
 
             try
             {
-                FtpWebRequest request = GetFTPRequest(path);
-                request.Method = WebRequestMethods.Ftp.MakeDirectory;
-                using (response = (FtpWebResponse)request.GetResponse())
-                {
-                    response.Close();
-                    return true;
-                }
+                //FtpWebRequest request = GetFTPRequest(path);
+                //request.Method = WebRequestMethods.Ftp.MakeDirectory;
+                //using (response = (FtpWebResponse)request.GetResponse())
+                //{
+                //    response.Close();
+                //    return true;
+                //}
+                FtpClient2.CreateDirectory(path);
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
             finally
             {
-                if (response != null && response.StatusCode == FtpStatusCode.ConnectionClosed)
+                if (response != null && response.StatusCode != FtpStatusCode.ConnectionClosed)
                 {
                     response.Close();
                 }
@@ -420,10 +440,13 @@ namespace DoubleX.Infrastructure.Utility
                     return true;
                 }
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
             finally
             {
-                if (response != null && response.StatusCode == FtpStatusCode.ConnectionClosed)
+                if (response != null && response.StatusCode != FtpStatusCode.ConnectionClosed)
                 {
                     response.Close();
                 }
@@ -455,10 +478,13 @@ namespace DoubleX.Infrastructure.Utility
                     return true;
                 }
             }
-            catch (Exception ex) { }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
             finally
             {
-                if (response != null && response.StatusCode == FtpStatusCode.ConnectionClosed)
+                if (response != null && response.StatusCode != FtpStatusCode.ConnectionClosed)
                 {
                     response.Close();
                 }
@@ -684,6 +710,19 @@ namespace DoubleX.Infrastructure.Utility
         Unknown
     }
     #endregion
+
+    public class FtpProgress : IProgress<double>
+    {
+        Action<long> action { get; }
+        public FtpProgress(Action<long> _action)
+        {
+            action = _action;
+        }
+        public void Report(double value)
+        {
+            action((long)value);
+        }
+    }
 
 
 }

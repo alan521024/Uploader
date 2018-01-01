@@ -109,7 +109,8 @@ namespace DoubleX.Upload
 
 
         //上传任务
-        private volatile bool uploadIsStop;
+        private volatile bool isUpload=false;
+        private volatile bool isAfresh = false;                 //是否重新上传的任务
         private System.Threading.Thread uploadThread = null;
 
         #endregion
@@ -143,6 +144,32 @@ namespace DoubleX.Upload
 
         private void btnConnectOpen_Click(object sender, RoutedEventArgs e)
         {
+            ftpOpen();
+        }
+
+        private void btnConnectClose_Click(object sender, RoutedEventArgs e)
+        {
+            ftpClose();
+        }
+
+        private void btnFTPServerView_Click(object sender, RoutedEventArgs e)
+        {
+            FileView win = new FileView(ftpUtil);
+            win.Owner = this;
+            win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
+            win.ShowDialog();
+        }
+
+        private void btnRegister_Click(object sender, RoutedEventArgs e)
+        {
+            Register win = new Register();
+            win.Owner = this;
+            win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
+            win.ShowDialog();
+        }
+
+        private void ftpOpen()
+        {
             ftpUtil = new FTPClientUtility(txtAddress.Text, txtName.Text, txtPassword.Text, IntHelper.Get(txtPort.Text), txtDirectory.Text);
             ControlUtil.ExcuteAction(this, () =>
             {
@@ -170,30 +197,19 @@ namespace DoubleX.Upload
             }
         }
 
-        private void btnConnectClose_Click(object sender, RoutedEventArgs e)
+        private void ftpClose()
         {
-            ftpUtil = null;
+            if (ftpUtil != null)
+            {
+                ftpUtil.Close();
+                ftpUtil = null;
+            }
             ControlUtil.ExcuteAction(this, () =>
             {
                 SetFTPControlStatus(false);
+                StopTask();
             });
             WriteLog(string.Format("FTP连接断开：地址：{0} {1}：{2}", txtAddress.Text, txtDirectory.Text, txtPort.Text), UILogType.Warning);
-        }
-
-        private void btnFTPServerView_Click(object sender, RoutedEventArgs e)
-        {
-            FileView win = new FileView(ftpUtil);
-            win.Owner = this;
-            win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
-            win.ShowDialog();
-        }
-
-        private void btnRegister_Click(object sender, RoutedEventArgs e)
-        {
-            Register win = new Register();
-            win.Owner = this;
-            win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
-            win.ShowDialog();
         }
 
         #endregion
@@ -275,7 +291,7 @@ namespace DoubleX.Upload
 
         #endregion
 
-        #region 任务(开始，结束，进度、结果)
+        #region 任务(开始，结束，进度、结果,重新上传(仅待上传/错误) )
 
         private void btnTaskRunning_Click(object sender, RoutedEventArgs e)
         {
@@ -303,65 +319,70 @@ namespace DoubleX.Upload
                 var databaseModel = GetDatabaseSettingModel();
                 var setting = GetTaskSettingModel();
                 string taskId = Guid.NewGuid().ToString().ToLower();
-                string url = AppHelper.GetConfig().WebUrl;
 
                 uploadThread = new Thread(new ThreadStart(() =>
                 {
-                    try
-                    {
-                        SetCurrentRunningUI();
-                        StartNewTask(taskId, beforeModel, afterModel, databaseModel, setting);
-                        System.Windows.Threading.Dispatcher.Run();
-                    }
-                    catch (ThreadAbortException ex)
-                    {
-                        //移除任务
-                        DeleteTask(taskId);
-                        ControlUtil.ShowMsg("任务中止");
-                    }
-                    catch (LicenseException ex)
-                    {
-                        if (MessageBox.Show(string.Format("{0}(官方网站：{1})", ExceptionHelper.GetMessage(ex), url), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
-                        {
-                            System.Diagnostics.Process.Start("explorer.exe", url);
-                            return;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        string exMsg = ExceptionHelper.GetMessage(ex);
-
-                        //设置任务状态
-                        UpdateTaskStatus(taskId, EnumTaskStatus.己中止);
-
-                        //状态栏
-                        WriteStatus("上传出错，任务中止");
-
-                        //写日志
-                        WriteLog(string.Format("上传出错，任务中止({0}) {1}", taskId, exMsg), UILogType.Error);
-
-                        ControlUtil.ShowMsg(exMsg, "错误", icon: MessageBoxImage.Error);
-                    }
-                    finally
-                    {
-                        //同步任务
-                        BindTaskList();
-
-                        //设置结束
-                        SetCurrentFinishUI();
-                    }
+                    InitTask(taskId, beforeModel, afterModel, databaseModel, setting);
                 }));
-                //uploadThread.SetApartmentState(ApartmentState.STA);
-                //uploadThread.IsBackground = true;
                 uploadThread.Start();
 
             }
         }
 
+        private void TaskView_AfreshTask(object sender, AfreshTaskEventArgs e)
+        {
+            var task = e.Task;
+            if (task == null)
+            {
+                return;
+            }
+
+            isAfresh = true;
+            string taskId = task.Id;
+            RequestModel beforeModel = null, afterModel = null;
+            DatabaseSettingModel databaseModel = null;
+            TaskSettingModel setting = null;
+
+            #region 参数重新设置
+
+            if (!string.IsNullOrEmpty(task.BeforeJSON))
+            {
+                beforeModel = JsonHelper.Deserialize<RequestModel>(task.BeforeJSON);
+                SetBeforeModel(beforeModel);
+            }
+            if (!string.IsNullOrEmpty(task.AfterJSON))
+            {
+                afterModel = JsonHelper.Deserialize<RequestModel>(task.AfterJSON);
+                SetAfterModel(afterModel);
+            }
+            if (!string.IsNullOrEmpty(task.DBSettingJSON))
+            {
+                databaseModel = JsonHelper.Deserialize<DatabaseSettingModel>(task.DBSettingJSON);
+                SetDatabaseModel(databaseModel);
+            }
+            if (!string.IsNullOrEmpty(task.SettingJSON))
+            {
+                setting = JsonHelper.Deserialize<TaskSettingModel>(task.SettingJSON);
+                SetSettingModel(setting);
+            }
+            if (!string.IsNullOrEmpty(task.PathJSON))
+            {
+                taskPathSource = JsonHelper.Deserialize<List<TaskPathModel>>(task.PathJSON);
+                SetTaskPath(taskPathSource);
+            }
+
+            #endregion
+
+            uploadThread = new Thread(new ThreadStart(() =>
+            {
+                InitTask(task.Id, beforeModel, afterModel, databaseModel, setting, task);
+            }));
+            uploadThread.Start();
+        }
+
         private void btnTaskStop_Click(object sender, RoutedEventArgs e)
         {
             StopTask();
-            SetCurrentFinishUI();
         }
 
         #endregion
@@ -370,12 +391,12 @@ namespace DoubleX.Upload
 
         private void btnClearTask_Click(object sender, RoutedEventArgs e)
         {
-            MessageBoxResult dr = System.Windows.MessageBox.Show("是否在清空操作记录(任务+上传)", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            MessageBoxResult dr = System.Windows.MessageBox.Show("是否清空操作记录(任务+上传)", "提示", MessageBoxButton.OKCancel, MessageBoxImage.Question);
             if (dr == MessageBoxResult.OK)
             {
-                StopTask();
                 DeleteTask(null);
-                SetCurrentFinishUI();
+                //StopTask();
+                BindTaskList();
             }
         }
 
@@ -402,10 +423,17 @@ namespace DoubleX.Upload
                     if (model == null)
                         return;
 
+                    if (isUpload) {
+
+                        ControlUtil.ShowMsg("正在上传任务中(不允许操作)...", "提示", icon: MessageBoxImage.Information);
+                        return;
+                    }
+
                     TaskView win = new TaskView(model);
                     win.Owner = this;
                     win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
-                    win.Show();
+                    win.AfreshTaskEvent += new TaskView.AfreshTaskHandler(TaskView_AfreshTask);
+                    win.ShowDialog();
                 }
             }
         }
@@ -807,7 +835,7 @@ namespace DoubleX.Upload
             });
             afterParam = afterList;
             gridRequestAfter.ItemsSource = afterList;
-            
+
         }
 
         /// <summary>
@@ -875,45 +903,155 @@ namespace DoubleX.Upload
             model.IsErrorGoOn = (chkIsErrorGoOn.IsChecked == true ? true : false);
             return model;
         }
-        
+
+
+        private void SetBeforeModel(RequestModel model)
+        {
+            if (model != null)
+            {
+                ControlUtil.ExcuteAction(this, () =>
+                {
+                    chkBeforeEnabled.IsChecked = model.IsEnable;
+                    txtBeforeUrl.Text = model.Url;
+                    beforeParam = model.Params;
+                    ControlUtil.DataGridSyncBinding(gridRequestBefore, beforeParam);
+                });
+            }
+        }
+
+        private void SetAfterModel(RequestModel model)
+        {
+            if (model != null)
+            {
+                ControlUtil.ExcuteAction(this, () =>
+                {
+                    chkAfterEnabled.IsChecked = model.IsEnable;
+                    txtAfterUrl.Text = model.Url;
+                    afterParam = model.Params;
+                    ControlUtil.DataGridSyncBinding(gridRequestAfter, afterParam);
+                });
+            }
+        }
+
+        private void SetDatabaseModel(DatabaseSettingModel model)
+        {
+            if (model != null)
+            {
+                ControlUtil.ExcuteAction(this, () =>
+                {
+                    chkDatabaseEnabled.IsChecked = model.IsEnable;
+                    raSQLserver.IsChecked = false;
+                    raMySql.IsChecked = false;
+                    raSQLite.IsChecked = false;
+                    switch (model.DBType)
+                    {
+                        case "sqlserver":
+                            raSQLserver.IsChecked = true;
+                            break;
+                        case "mysql":
+                            raMySql.IsChecked = true;
+                            break;
+                        case "sqlite":
+                            raSQLite.IsChecked = true;
+                            break;
+                    }
+                    txtConnectionStr.Text = model.ConnectionStr;
+                    txtSql.Text = model.SQL;
+                });
+            }
+        }
+
+        private void SetSettingModel(TaskSettingModel model)
+        {
+            if (model != null)
+            {
+                ControlUtil.ExcuteAction(this, () =>
+                {
+                    txtDirectory.Text = model.RootPath;
+                    chkBeforeEnabled.IsChecked = model.IsBefore;
+                    chkAfterEnabled.IsChecked = model.IsAfter;
+                    chkIsErrorGoOn.IsChecked = model.IsErrorGoOn;
+                });
+            }
+        }
+
+        private void SetTaskPath(List<TaskPathModel> source)
+        {
+            if (source != null)
+            {
+                ControlUtil.ExcuteAction(this, () =>
+                {
+                    taskPathSource = source;
+                    BindTaskPathSource();
+                });
+            }
+        }
+
         #endregion
 
         #region 辅助方法-任务操作
 
         /// <summary>
-        /// 设置当前界面运行状态（禁用控件）
+        /// 初始任务
         /// </summary>
-        private void SetCurrentRunningUI()
+        private void InitTask(string taskId, RequestModel beforeModel, RequestModel afterModel, DatabaseSettingModel databaseModel, TaskSettingModel setting, TaskEntity taskEntity = null)
         {
-            ControlUtil.ExcuteAction(this, () =>
+            string url = AppHelper.GetConfig().WebUrl;
+            isUpload = true; //线程信号
+
+            try
             {
-                btnTaskRunning.Visibility = Visibility.Collapsed;
-                btnTaskStop.Visibility = Visibility.Visible;
-            });
+                SetCurrentRunningUI();
+                if (isAfresh && taskEntity != null)
+                {
+                    AfreshTask(taskEntity, beforeModel, afterModel, databaseModel, setting);
+                }
+                else
+                {
+                    StartTask(taskId, beforeModel, afterModel, databaseModel, setting);
+                }
+                System.Windows.Threading.Dispatcher.Run();
+            }
+            catch (ThreadAbortException ex)
+            {
+                //移除任务
+                //DeleteTask(taskId);
+                ControlUtil.ShowMsg("任务中止");
+            }
+            catch (LicenseException ex)
+            {
+                if (MessageBox.Show(string.Format("{0}(官方网站：{1})", ExceptionHelper.GetMessage(ex), url), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
+                {
+                    System.Diagnostics.Process.Start("explorer.exe", url);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                string exMsg = ExceptionHelper.GetMessage(ex);
+
+                //设置任务状态
+                UpdateTaskStatus(taskId, EnumTaskStatus.己中止);
+
+                //状态栏
+                WriteStatus("上传出错，任务中止");
+
+                //写日志
+                WriteLog(string.Format("上传出错，任务中止({0}) {1}", taskId, exMsg), UILogType.Error);
+
+                ControlUtil.ShowMsg(exMsg, "错误", icon: MessageBoxImage.Error);
+            }
+            finally
+            {
+                SetCurrentFinishUI();
+            }
         }
 
         /// <summary>
-        /// 设置当前界面结束状态（启用控件）
+        ///  开始任务
         /// </summary>
-        private void SetCurrentFinishUI()
+        private void StartTask(string taskId, RequestModel beforeModel, RequestModel afterModel, DatabaseSettingModel databaseSettingModel, TaskSettingModel setting)
         {
-            BindTaskList();
-
-            ControlUtil.ExcuteAction(this, () =>
-            {
-                btnTaskRunning.Visibility = Visibility.Visible;
-                btnTaskStop.Visibility = Visibility.Collapsed;
-                tbStatus.Text = "未有任务运行....";
-            });
-        }
-
-        /// <summary>
-        ///  开始一个新任务
-        /// </summary>
-        private void StartNewTask(string taskId, RequestModel beforeModel, RequestModel afterModel, DatabaseSettingModel databaseSettingModel, TaskSettingModel setting)
-        {
-            //线程信号
-            uploadIsStop = false;
 
             #region 增加任务数据
 
@@ -952,7 +1090,7 @@ namespace DoubleX.Upload
             WriteStatus("正在添加文件数据信息");
 
             //更新任务记录数据库配置置
-            string destDbPath = CopyFileLogTempateDB(taskId);
+            string destDbPath = CopyFileLogTempateDB(taskId, true);
             setting.FileDatabasePath = destDbPath.Replace(AppHelper.DatabasePath, "");
             taskEntity.SettingJSON = JsonHelper.Serialize(setting);
             UpdateTaskSetting(taskEntity);
@@ -978,130 +1116,146 @@ namespace DoubleX.Upload
 
             #endregion
 
-            #region 上传文件操作
+            #region 上传文件操作(原代码)
 
-            WriteLog("正在上传文件");
-            WriteStatus("正在上传文件");
+            //WriteLog("正在上传文件");
+            //WriteStatus("正在上传文件");
 
-            //设置任务状态
-            UpdateTaskStatus(taskEntity.Id, EnumTaskStatus.进行中);
+            ////设置任务状态
+            //UpdateTaskStatus(taskEntity.Id, EnumTaskStatus.进行中);
 
-            //数据库操作配置
-            DatabaseSettingModel databaseModel = null;
-            if (!VerifyHelper.IsEmpty(taskEntity.DBSettingJSON))
-            {
-                databaseModel = JsonConvert.DeserializeObject<DatabaseSettingModel>(taskEntity.DBSettingJSON);
-            }
-            int currentUploadFileTotal = 0, currentIndex = 0;
-            do
-            {
-                var table = GetUploadFiles(destDbPath, taskEntity);
-                if (table != null)
-                {
-                    currentUploadFileTotal = currentUploadFileTotal + table.Rows.Count;
-                }
-                foreach (DataRow row in table.Rows)
-                {
-                    var taskFileEntity = AppHelper.GetTaskFileEntityByRow(row);
-                    if (row != null && taskFileEntity != null && !string.IsNullOrWhiteSpace(taskFileEntity.FilePath))
-                    {
-                        try
-                        {
-                            //上传文件前调用接口
-                            BeforeApiRequest(destDbPath, taskEntity, taskFileEntity);
+            ////数据库操作配置
+            //DatabaseSettingModel databaseModel = null;
+            //if (!VerifyHelper.IsEmpty(taskEntity.DBSettingJSON))
+            //{
+            //    databaseModel = JsonConvert.DeserializeObject<DatabaseSettingModel>(taskEntity.DBSettingJSON);
+            //}
+            //int currentUploadFileTotal = 0, currentIndex = 0;
+            //do
+            //{
+            //    var table = GetUploadFiles(destDbPath, taskEntity);
+            //    if (table != null)
+            //    {
+            //        currentUploadFileTotal = currentUploadFileTotal + table.Rows.Count;
+            //    }
+            //    foreach (DataRow row in table.Rows)
+            //    {
+            //        var taskFileEntity = AppHelper.GetTaskFileEntityByRow(row);
+            //        if (row != null && taskFileEntity != null && !string.IsNullOrWhiteSpace(taskFileEntity.FilePath))
+            //        {
+            //            try
+            //            {
+            //                //上传文件前调用接口
+            //                BeforeApiRequest(destDbPath, taskEntity, taskFileEntity);
 
-                            //上传文件
-                            try
-                            {
-                                ftpUtil.Upload(taskFileEntity.FilePath, taskFileEntity.ServerFullPath, 200, (current) =>
-                                {
-                                    WriteStatus(string.Format("正在上传文件：{0} ({1}/{2})", taskFileEntity.FileName, current, taskFileEntity.FileSize));
-                                });
-                            }
-                            catch (Exception ex)
-                            {
-                                if (!setting.IsErrorGoOn)
-                                {
-                                    throw ex;
-                                }
-                            }
+            //                //上传文件
+            //                try
+            //                {
+            //                    ftpUtil.Upload(taskFileEntity.FilePath, taskFileEntity.ServerFullPath, 200, (current) =>
+            //                    {
+            //                        WriteStatus(string.Format("正在上传文件：{0} ({1}/{2})", taskFileEntity.FileName, current, taskFileEntity.FileSize));
+            //                    });
+            //                }
+            //                catch (Exception ex)
+            //                {
+            //                    if (!setting.IsErrorGoOn)
+            //                    {
+            //                        throw ex;
+            //                    }
+            //                }
 
-                            //上传文件后调用接口
-                            AfterApiRequest(destDbPath, taskEntity, taskFileEntity);
+            //                //上传文件后调用接口
+            //                AfterApiRequest(destDbPath, taskEntity, taskFileEntity);
 
-                            //上传文件后数据库执行
-                            if (databaseModel != null && databaseModel.IsEnable)
-                            {
-                                SQLExecute(databaseModel.DBType, databaseModel.ConnectionStr, ReplaceSqlTag(databaseModel.SQL, taskEntity, taskFileEntity));
-                            }
+            //                //上传文件后数据库执行
+            //                if (databaseModel != null && databaseModel.IsEnable)
+            //                {
+            //                    SQLExecute(databaseModel.DBType, databaseModel.ConnectionStr, ReplaceSqlTag(databaseModel.SQL, taskEntity, taskFileEntity));
+            //                }
 
-                            //设置文件状态
-                            UpdateTaskFileStatus(destDbPath, taskEntity, taskFileEntity, EnumTaskFileStatus.完成);
+            //                //设置文件状态
+            //                UpdateTaskFileStatus(destDbPath, taskEntity, taskFileEntity, EnumTaskFileStatus.完成);
 
-                            //增加任务成功记录
-                            UpdateTaskSuccess(taskEntity, taskFileEntity);
+            //                //增加任务成功记录
+            //                UpdateTaskSuccess(taskEntity, taskFileEntity);
 
-                            //同步任务
-                            BindTaskList();
-                        }
-                        catch (ThreadAbortException ex)
-                        {
-                            throw ex;
-                        }
-                        catch (Exception ex)
-                        {
-                            //异常消息
-                            string exMsg = ExceptionHelper.GetMessage(ex);
+            //                //同步任务
+            //                BindTaskList();
+            //            }
+            //            catch (ThreadAbortException ex)
+            //            {
+            //                throw ex;
+            //            }
+            //            catch (Exception ex)
+            //            {
+            //                //异常消息
+            //                string exMsg = ExceptionHelper.GetMessage(ex);
 
-                            //写日志
-                            WriteLog(string.Format("文件: {0}({1}) 上传出错", taskFileEntity.FileName, taskFileEntity.Id), UILogType.Error);
+            //                //写日志
+            //                WriteLog(string.Format("文件: {0}({1}) 上传出错", taskFileEntity.FileName, taskFileEntity.Id), UILogType.Error);
 
-                            //设置文件状态
-                            UpdateTaskFileStatus(destDbPath, taskEntity, taskFileEntity, EnumTaskFileStatus.出错);
+            //                //设置文件状态
+            //                UpdateTaskFileStatus(destDbPath, taskEntity, taskFileEntity, EnumTaskFileStatus.出错);
 
-                            //只加错误，继续运行
-                            UpdateTaskError(taskEntity, taskFileEntity, setting, exMsg);
+            //                //只加错误，继续运行
+            //                UpdateTaskError(taskEntity, taskFileEntity, setting, exMsg);
 
-                            //同步任务
-                            BindTaskList();
+            //                //同步任务
+            //                BindTaskList();
 
-                            if (!setting.IsErrorGoOn)
-                            {
-                                //由外部修改状态,并结束
-                                throw new Exception(string.Format("出现错误，任务中止 {0}", exMsg));
-                            }
-                        }
-                    }
-                    currentIndex++;
-                }
-            } while (currentUploadFileTotal < taskEntity.FileTotal);
+            //                if (!setting.IsErrorGoOn)
+            //                {
+            //                    //由外部修改状态,并结束
+            //                    throw new Exception(string.Format("出现错误，任务中止 {0}", exMsg));
+            //                }
+            //            }
+            //        }
+            //        currentIndex++;
+            //    }
+            //} while (currentUploadFileTotal < taskEntity.FileTotal);
 
-            string overMsg = string.Format("文件上传完成：总数：{0}，成功：{1}，失败：{2}", taskEntity.FileTotal, taskEntity.SuccessTotal, taskEntity.ErrorTotal);
+            //string overMsg = string.Format("文件上传完成：总数：{0}，成功：{1}，失败：{2}", taskEntity.FileTotal, taskEntity.SuccessTotal, taskEntity.ErrorTotal);
 
-            //设置任务状态
-            UpdateTaskStatus(taskEntity.Id, EnumTaskStatus.己完成);
+            ////设置任务状态
+            //UpdateTaskStatus(taskEntity.Id, EnumTaskStatus.己完成);
 
-            //状态栏
-            WriteStatus(overMsg);
+            ////状态栏
+            //WriteStatus(overMsg);
 
-            //写日志
-            WriteLog(string.Format("{0} 任务({1}/{2})", overMsg, taskEntity.Id, taskEntity.TaskName), taskEntity.ErrorTotal > 0 ? UILogType.Error : UILogType.Success);
+            ////写日志
+            //WriteLog(string.Format("{0} 任务({1}/{2})", overMsg, taskEntity.Id, taskEntity.TaskName), taskEntity.ErrorTotal > 0 ? UILogType.Error : UILogType.Success);
 
-            //同步任务
-            BindTaskList();
+            ////同步任务
+            //BindTaskList();
 
-            //设置结束
-            SetCurrentFinishUI();
+            ////设置结束
+            //SetCurrentFinishUI();
 
             #endregion
+
+            UploadFile(taskEntity, beforeModel, afterModel, databaseSettingModel, setting, destDbPath);
         }
 
         /// <summary>
-        /// 结束上传
+        /// 重新任务
+        /// </summary>
+        private void AfreshTask(TaskEntity taskEntity, RequestModel beforeModel, RequestModel afterModel, DatabaseSettingModel databaseSettingModel, TaskSettingModel setting)
+        {
+            //更新任务记录数据库配置置
+            string destDbPath = CopyFileLogTempateDB(taskEntity.Id, false);
+            //重置任务状态
+            ModifyUploadFileStatus(destDbPath, taskEntity);
+            //上传文件
+            UploadFile(taskEntity, beforeModel, afterModel, databaseSettingModel, setting, destDbPath);
+        }
+
+        /// <summary>
+        /// 结束任务
         /// </summary>
         private void StopTask()
         {
-            uploadIsStop = true;
+            SetCurrentFinishUI();
+
             if (uploadThread != null)
             {
                 uploadThread.Abort();
@@ -1122,6 +1276,161 @@ namespace DoubleX.Upload
                 }
             }
 
+        }
+
+        /// <summary>
+        /// 上传文件
+        /// </summary>
+        private void UploadFile(TaskEntity taskEntity, RequestModel beforeModel, RequestModel afterModel, DatabaseSettingModel databaseSettingModel, TaskSettingModel setting, string destDbPath)
+        {
+
+            WriteLog("正在上传文件");
+            WriteStatus("正在上传文件");
+
+            //设置任务状态
+            UpdateTaskStatus(taskEntity.Id, EnumTaskStatus.进行中);
+
+            //数据库操作配置
+            DatabaseSettingModel databaseModel = null;
+            if (!VerifyHelper.IsEmpty(taskEntity.DBSettingJSON))
+            {
+                databaseModel = JsonConvert.DeserializeObject<DatabaseSettingModel>(taskEntity.DBSettingJSON);
+            }
+            int currentUploadFileTotal = 0, currentIndex = 0, dataTotal = GetUploadFilesTotal(destDbPath, taskEntity);
+            if (dataTotal > 0)
+            {
+                do
+                {
+                    var table = GetUploadFiles(destDbPath, taskEntity);
+                    if (table != null)
+                    {
+                        currentUploadFileTotal = currentUploadFileTotal + table.Rows.Count;
+
+                        foreach (DataRow row in table.Rows)
+                        {
+                            var taskFileEntity = AppHelper.GetTaskFileEntityByRow(row);
+                            if (row != null && taskFileEntity != null && !string.IsNullOrWhiteSpace(taskFileEntity.FilePath))
+                            {
+                                try
+                                {
+                                    //上传文件前调用接口
+                                    BeforeApiRequest(destDbPath, taskEntity, taskFileEntity);
+
+                                    //上传文件
+                                    try
+                                    {
+                                        ftpUtil.Upload(taskFileEntity.FilePath, taskFileEntity.ServerFullPath, 200, (current) =>
+                                        {
+                                            WriteStatus(string.Format("正在上传文件：{0} ({1}/{2})", taskFileEntity.FileName, current, taskFileEntity.FileSize));
+                                        });
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        if (!setting.IsErrorGoOn)
+                                        {
+                                            throw ex;
+                                        }
+                                    }
+
+                                    //上传文件后调用接口
+                                    AfterApiRequest(destDbPath, taskEntity, taskFileEntity);
+
+                                    //上传文件后数据库执行
+                                    if (databaseModel != null && databaseModel.IsEnable)
+                                    {
+                                        SQLExecute(databaseModel.DBType, databaseModel.ConnectionStr, ReplaceSqlTag(databaseModel.SQL, taskEntity, taskFileEntity));
+                                    }
+
+                                    //设置文件状态
+                                    UpdateTaskFileStatus(destDbPath, taskEntity, taskFileEntity, EnumTaskFileStatus.完成);
+
+                                    //增加任务成功记录
+                                    UpdateTaskSuccess(taskEntity, taskFileEntity);
+
+                                    //同步任务
+                                    BindTaskList();
+                                }
+                                catch (ThreadAbortException ex)
+                                {
+                                    throw ex;
+                                }
+                                catch (Exception ex)
+                                {
+                                    //异常消息
+                                    string exMsg = ExceptionHelper.GetMessage(ex);
+
+                                    //写日志
+                                    WriteLog(string.Format("文件: {0}({1}) 上传出错", taskFileEntity.FileName, taskFileEntity.Id), UILogType.Error);
+
+                                    //设置文件状态
+                                    UpdateTaskFileStatus(destDbPath, taskEntity, taskFileEntity, EnumTaskFileStatus.出错);
+
+                                    //只加错误，继续运行
+                                    UpdateTaskError(taskEntity, taskFileEntity, setting, exMsg);
+
+                                    //同步任务
+                                    BindTaskList();
+
+                                    if (!setting.IsErrorGoOn)
+                                    {
+                                        //由外部修改状态,并结束
+                                        throw new Exception(string.Format("出现错误，任务中止 {0}", exMsg));
+                                    }
+                                }
+                            }
+                            currentIndex++;
+                        }
+                    }
+                } while (currentUploadFileTotal < dataTotal);
+            }
+
+
+            string overMsg = string.Format("文件上传完成：总数：{0}，成功：{1}，失败：{2}", dataTotal, taskEntity.SuccessTotal, taskEntity.ErrorTotal);
+
+            //设置任务状态
+            UpdateTaskStatus(taskEntity.Id, EnumTaskStatus.己完成);
+
+            //状态栏
+            WriteStatus(overMsg);
+
+            //写日志
+            WriteLog(string.Format("{0} 任务({1}/{2})", overMsg, taskEntity.Id, taskEntity.TaskName), taskEntity.ErrorTotal > 0 ? UILogType.Error : UILogType.Success);
+
+            //同步任务
+            BindTaskList();
+
+            //设置结束
+            SetCurrentFinishUI();
+        }
+
+        /// <summary>
+        /// 设置当前界面运行状态（禁用控件）
+        /// </summary>
+        private void SetCurrentRunningUI()
+        {
+            ControlUtil.ExcuteAction(this, () =>
+            {
+                btnTaskRunning.Visibility = Visibility.Collapsed;
+                btnTaskStop.Visibility = Visibility.Visible;
+            });
+        }
+
+        /// <summary>
+        /// 设置当前界面结束状态（启用控件）
+        /// </summary>
+        private void SetCurrentFinishUI()
+        {
+            isUpload = false;
+            isAfresh = false;
+
+            BindTaskList();
+
+            ControlUtil.ExcuteAction(this, () =>
+            {
+                btnTaskRunning.Visibility = Visibility.Visible;
+                btnTaskStop.Visibility = Visibility.Collapsed;
+                tbStatus.Text = "未有任务运行....";
+            });
         }
 
         #endregion
@@ -1541,6 +1850,44 @@ namespace DoubleX.Upload
         }
 
         /// <summary>
+        /// 获取待上传文件数据总数
+        /// </summary>
+        /// <param name="destDbPath"></param>
+        /// <param name="taskEntity"></param>
+        /// <returns></returns>
+        private int GetUploadFilesTotal(string destDbPath, TaskEntity taskEntity)
+        {
+            string sql = string.Format("select count(*) from  TB_Files where TaskId='{0}' and Status={1}", taskEntity.Id, (int)EnumTaskFileStatus.待上传);
+            object obj = SQLiteHelper.ExecuteScalar(AppHelper.GetTaskFileDatabaseConnectionStr(destDbPath), sql, CommandType.Text);
+            int total = 0;
+            if (obj != null)
+            {
+                int.TryParse(obj.ToString(), out total);
+            }
+            return total;
+        }
+
+        /// <summary>
+        /// 重置上传状态
+        /// </summary>
+        /// <param name="destDbPath"></param>
+        /// <param name="taskEntity"></param>
+        private void ModifyUploadFileStatus(string destDbPath, TaskEntity taskEntity)
+        {
+            string sql = string.Format("Update TB_Files set Status={1} where TaskId='{0}' and Status<>{2}", taskEntity.Id, (int)EnumTaskFileStatus.待上传, (int)EnumTaskFileStatus.完成);
+            SQLiteHelper.ExecuteNonQuery(AppHelper.GetTaskFileDatabaseConnectionStr(destDbPath), sql, CommandType.Text);
+
+            StringBuilder strSql = new StringBuilder();
+            strSql.Append("Update TB_Task set ErrorJSON='',ErrorTotal=0 where Id=@Id");
+            SQLiteParameter[] parameters = {
+                    new SQLiteParameter("@Id", DbType.String)
+            };
+            parameters[0].Value = taskEntity.Id;
+
+            SQLiteHelper.ExecuteNonQuery(AppHelper.GetTaskDatabaseConnectionStr(), strSql.ToString(), CommandType.Text, parameters);
+        }
+
+        /// <summary>
         /// 获取任务列表
         /// </summary>
         /// <returns></returns>
@@ -1561,13 +1908,12 @@ namespace DoubleX.Upload
             return list;
         }
 
-
         /// <summary>
         /// 从模版复制当前任务上传文件库
         /// </summary>
         /// <param name="taskName"></param>
         /// <returns></returns>
-        private string CopyFileLogTempateDB(string taskId)
+        private string CopyFileLogTempateDB(string taskId, bool isOverride = true)
         {
             string sourcePath = string.Format(@"{0}template.db", AppHelper.DatabasePath);
             string destDirPath = string.Format(@"{0}/temp/{1}/", AppHelper.DatabasePath, DateTime.Now.ToString("yyyyMM"));
@@ -1576,7 +1922,14 @@ namespace DoubleX.Upload
                 Directory.CreateDirectory(destDirPath);
             }
             string destFilePath = string.Format("{0}{1}.db", destDirPath, taskId);
-            File.Copy(sourcePath, destFilePath);
+            if (isOverride)
+            {
+                File.Copy(sourcePath, destFilePath, true);
+            }
+            if (!isOverride && !File.Exists(destFilePath))
+            {
+                File.Copy(sourcePath, destFilePath);
+            }
             return destFilePath;
         }
 
@@ -1925,7 +2278,7 @@ namespace DoubleX.Upload
                     var afterSetting = JsonHelper.Deserialize<RequestModel>(taskEntity.AfterJSON);
                     param = afterSetting.Params;
                 }
-                
+
                 foreach (var item in param)
                 {
                     if (item.Name.ToLower() == "id")
@@ -2293,4 +2646,5 @@ namespace DoubleX.Upload
         #endregion
 
     }
+
 }

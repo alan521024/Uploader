@@ -118,6 +118,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="App\AfreshTaskEventArgs.cs" />
     <Compile Include="DatabaseHelper.xaml.cs">
       <DependentUpon>DatabaseHelper.xaml</DependentUpon>
     </Compile>
