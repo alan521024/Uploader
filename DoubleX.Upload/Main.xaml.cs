@@ -132,6 +132,10 @@ namespace DoubleX.Upload
             ControlUtil.ExcuteAction(this, () =>
             {
                 LastVerision();
+                //测试地址
+                txtAddress.Text = "139.196.229.64";
+                txtName.Text = "ftp_shdev_opt";
+                txtPassword.Text = "sh";
             });
         }
 

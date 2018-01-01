@@ -84,7 +84,14 @@ namespace DoubleX.Infrastructure.Utility
 
             try
             {
-                request.Method = WebRequestMethods.Ftp.MakeDirectory;
+                if (VerifyHelper.IsEmpty(ClientModel.Directory) || ClientModel.Directory == "/" || ClientModel.Directory == "\\")
+                {
+                    request.Method = WebRequestMethods.Ftp.ListDirectory;
+                }
+                else
+                {
+                    request.Method = WebRequestMethods.Ftp.MakeDirectory;
+                }
                 using (FtpWebResponse response = (FtpWebResponse)request.GetResponse())
                 {
                     IsConnection = true;
@@ -119,7 +126,8 @@ namespace DoubleX.Infrastructure.Utility
             {
                 //处理目录
                 var dicPath = Path.GetDirectoryName(serverFilePath).Replace("\\", "/");
-                if (dicPath != "/") {
+                if (dicPath != "/")
+                {
                     DirectoryMake(dicPath);
                 }
 
@@ -333,7 +341,7 @@ namespace DoubleX.Infrastructure.Utility
                 //Flags;
                 //Owner;  //item.OwnerPermissions
                 //Group;  //item.GroupPermissions
-                struce.CreateTime= client.GetModifiedTime(item.FullName);
+                struce.CreateTime = client.GetModifiedTime(item.FullName);
                 list.Add(struce);
             }
 
