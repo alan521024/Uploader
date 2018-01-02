@@ -109,7 +109,7 @@ namespace DoubleX.Upload
 
 
         //上传任务
-        private volatile bool isUpload=false;
+        private volatile bool isUpload = false;
         private volatile bool isAfresh = false;                 //是否重新上传的任务
         private System.Threading.Thread uploadThread = null;
 
@@ -423,7 +423,8 @@ namespace DoubleX.Upload
                     if (model == null)
                         return;
 
-                    if (isUpload) {
+                    if (isUpload)
+                    {
 
                         ControlUtil.ShowMsg("正在上传任务中(不允许操作)...", "提示", icon: MessageBoxImage.Information);
                         return;
@@ -1296,7 +1297,7 @@ namespace DoubleX.Upload
             {
                 databaseModel = JsonConvert.DeserializeObject<DatabaseSettingModel>(taskEntity.DBSettingJSON);
             }
-            int currentUploadFileTotal = 0, currentIndex = 0, dataTotal = GetUploadFilesTotal(destDbPath, taskEntity);
+            int currentUploadFileTotal = 0, currentIndex = 0, dataTotal = GetUploadFilesTotal(taskEntity.Id, destDbPath, EnumTaskFileStatus.待上传);
             if (dataTotal > 0)
             {
                 do
@@ -1387,8 +1388,9 @@ namespace DoubleX.Upload
 
             string overMsg = string.Format("文件上传完成：总数：{0}，成功：{1}，失败：{2}", dataTotal, taskEntity.SuccessTotal, taskEntity.ErrorTotal);
 
-            //设置任务状态
-            UpdateTaskStatus(taskEntity.Id, EnumTaskStatus.己完成);
+            //设置任务状态(己完成,并同步结果数据,新方法SyncTaskResult中同时设置状态了)
+            //UpdateTaskStatus(taskEntity.Id, EnumTaskStatus.己完成);
+            SyncTaskResult(taskEntity.Id, destDbPath);
 
             //状态栏
             WriteStatus(overMsg);
@@ -1684,6 +1686,34 @@ namespace DoubleX.Upload
         }
 
         /// <summary>
+        /// 同步任务结果
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <param name="destDbPath"></param>
+        public void SyncTaskResult(string taskId, string destDbPath)
+        {
+            int fileTotal = GetUploadFilesTotal(taskId, destDbPath, null);
+            int successTotal = GetUploadFilesTotal(taskId, destDbPath, EnumTaskFileStatus.完成);
+
+            StringBuilder strSql = new StringBuilder();
+            strSql.Append("Update TB_Task set Status=@Status,FileTotal=@FileTotal,SuccessTotal=@SuccessTotal,ErrorTotal=@ErrorTotal where Id=@Id");
+            SQLiteParameter[] parameters = {
+                    new SQLiteParameter("@Id", DbType.String),
+                    new SQLiteParameter("@Status", DbType.Int32,4),
+                    new SQLiteParameter("@FileTotal", DbType.Int32,4),
+                    new SQLiteParameter("@SuccessTotal", DbType.Int32,4),
+                    new SQLiteParameter("@ErrorTotal", DbType.Int32,4)
+            };
+            parameters[0].Value = taskId;
+            parameters[1].Value = (int)EnumTaskStatus.己完成;
+            parameters[2].Value = fileTotal;
+            parameters[3].Value = successTotal;
+            parameters[4].Value = fileTotal- successTotal;
+
+            SQLiteHelper.ExecuteNonQuery(AppHelper.GetTaskDatabaseConnectionStr(), strSql.ToString(), CommandType.Text, parameters);
+        }
+
+        /// <summary>
         /// 更新任务错误
         /// </summary>
         /// <param name="taskEntity"></param>
@@ -1850,14 +1880,18 @@ namespace DoubleX.Upload
         }
 
         /// <summary>
-        /// 获取待上传文件数据总数
+        /// 获取状态值文件数据总数
         /// </summary>
         /// <param name="destDbPath"></param>
         /// <param name="taskEntity"></param>
         /// <returns></returns>
-        private int GetUploadFilesTotal(string destDbPath, TaskEntity taskEntity)
+        private int GetUploadFilesTotal(string taskId, string destDbPath, EnumTaskFileStatus? status)
         {
-            string sql = string.Format("select count(*) from  TB_Files where TaskId='{0}' and Status={1}", taskEntity.Id, (int)EnumTaskFileStatus.待上传);
+            string sql = string.Format("select count(*) from  TB_Files where TaskId='{0}' ", taskId);
+            if (status != null)
+            {
+                sql += string.Format(" and Status={0} ", (int)status.Value);
+            }
             object obj = SQLiteHelper.ExecuteScalar(AppHelper.GetTaskFileDatabaseConnectionStr(destDbPath), sql, CommandType.Text);
             int total = 0;
             if (obj != null)
