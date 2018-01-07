@@ -126,12 +126,6 @@ namespace DoubleX.Upload
             BindTaskList();
             Loading();
             this.Loaded += Main_Loaded;
-
-            txtAddress.Text = "139.196.229.64";
-            txtName.Text = "ftp_shdev_opt";
-            txtPassword.Text = "sh";
-
-
         }
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
@@ -172,7 +166,8 @@ namespace DoubleX.Upload
 
         private void btnHelper_Click(object sender, RoutedEventArgs e)
         {
-
+            string helpPath = AppDomain.CurrentDomain.BaseDirectory + "Help";
+            System.Diagnostics.Process.Start("explorer.exe", helpPath);
         }
 
         private void ftpOpen()

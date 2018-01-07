@@ -25,7 +25,7 @@
                     <Button x:Name="btnConnectClose" Visibility="Collapsed"  Style="{DynamicResource Button-Info}"  Margin="0,0,10,0" Click="btnConnectClose_Click">断开连接(C)</Button>
                     <Button x:Name="btnFTPServerView"  Visibility="Collapsed"  Style="{DynamicResource Button-Primary}"  Margin="0,0,10,0" Click="btnFTPServerView_Click">目录浏览(D)</Button>
                     <Button Name="btnRegister"  Margin="0,0,10,0" Click="btnRegister_Click">试用软件注册</Button>
-                    <dxui:DxButton x:Name="btnHelper" Margin="0,0,5,0" IconLeft="&#xf059;" Click="btnHelper_Click"></dxui:DxButton>
+                    <dxui:DxButton x:Name="btnHelper" Margin="0,0,5,0" IconLeft="&#xf059;" Click="btnHelper_Click" ToolTip="帮助文档"></dxui:DxButton>
                     <!-- 这里增加一个连接历史记录  -->
                 </StackPanel>
             </GroupBox>

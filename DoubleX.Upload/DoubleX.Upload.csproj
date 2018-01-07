@@ -228,6 +228,9 @@
     <None Include="Data\license.key">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Help\QC-ACF软件注册流程.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\app.manifest">
       <SubType>Designer</SubType>
@@ -263,7 +266,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\temp\" />
-    <Folder Include="Help\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\acad.png" />
