@@ -79,6 +79,13 @@
 
                                             <!-- 系统按钮(关闭/最大化/最小化)-->
                                             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top" shell:WindowChrome.IsHitTestVisibleInChrome="True">
+                                                <Button Style="{DynamicResource WindowHeaderSysBtn}">
+                                                    <Button.Content>
+                                                        <Grid Width="13" Height="12" RenderTransform="1,0,0,1,0,1">
+                                                            <Label Foreground="White">&#xf059;</Label>
+                                                        </Grid>
+                                                    </Button.Content>
+                                                </Button>
                                                 <Button Command="{Binding Source={x:Static shell:SystemCommands.MinimizeWindowCommand}}" ToolTip="{x:Static dxui:Resources.Minimize}" Style="{DynamicResource WindowHeaderSysBtn}">
                                                     <Button.Content>
                                                         <Grid Width="13" Height="12" RenderTransform="1,0,0,1,0,1">
