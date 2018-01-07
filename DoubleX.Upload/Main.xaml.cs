@@ -2573,18 +2573,18 @@ namespace DoubleX.Upload
         {
             if (!isTrial)
             {
+                //注册软件
                 if (licenseFileModel.Edition == EnumEditionType.Basic.ToString())
                 {
                     this.btnRegister.Content = "已授基础版";
                 }
-                //专业版设置
                 if (licenseFileModel.Edition == EnumEditionType.Professional.ToString())
                 {
                     this.btnRegister.Content = "已授高级版";
                 }
                 this.btnRegister.Style = this.FindResource("Button-Info") as Style;
-                
                 this.btnRegister.ApplyTemplate();
+
                 if (ftpUtil != null && ftpUtil.IsConnection)
                 {
                     this.btnRegister.Visibility = Visibility.Collapsed;     //隐藏授权信息
@@ -2598,6 +2598,7 @@ namespace DoubleX.Upload
             }
             else
             {
+                this.btnRegister.Content = "试用软件注册";
                 this.btnRegister.Style = this.FindResource("Button-Danger") as Style;
                 this.btnRegister.ApplyTemplate();
                 this.btnRegister.Visibility = Visibility.Visible;
