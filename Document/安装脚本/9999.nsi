@@ -94,6 +94,10 @@ Section "MainSection" SEC01
   File /r "..\..\..\..\Release\上传工具\x64\*.*"
   SetOutPath "$INSTDIR\x86"
   File /r "..\..\..\..\Release\上传工具\x86\*.*"
+  SetOutPath "$INSTDIR\Help"
+  File /r "..\..\..\..\Release\上传工具\Help\*.*"
+  SetOutPath "$INSTDIR\Help"
+  File /r "..\..\..\..\Release\上传工具\Help\*.*"
   
 
 ; 创建开始菜单快捷方式
