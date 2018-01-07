@@ -2576,11 +2576,11 @@ namespace DoubleX.Upload
                 //注册软件
                 if (licenseFileModel.Edition == EnumEditionType.Basic.ToString())
                 {
-                    this.btnRegister.Content = "已授基础版";
+                    this.btnRegister.Content = "基础正式版";
                 }
                 if (licenseFileModel.Edition == EnumEditionType.Professional.ToString())
                 {
-                    this.btnRegister.Content = "已授高级版";
+                    this.btnRegister.Content = "高级正式版";
                 }
                 this.btnRegister.Style = this.FindResource("Button-Info") as Style;
                 this.btnRegister.ApplyTemplate();
