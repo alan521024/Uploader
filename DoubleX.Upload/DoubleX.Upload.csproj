@@ -263,6 +263,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Data\temp\" />
+    <Folder Include="Help\" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Icons\acad.png" />
