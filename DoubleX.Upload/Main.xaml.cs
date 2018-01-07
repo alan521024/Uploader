@@ -142,7 +142,7 @@ namespace DoubleX.Upload
             });
         }
 
-        #region FTP连接/断开/浏览/注册
+        #region FTP连接/断开/浏览/注册/帮助
 
         private void btnConnectOpen_Click(object sender, RoutedEventArgs e)
         {
@@ -168,6 +168,11 @@ namespace DoubleX.Upload
             win.Owner = this;
             win.WindowStartupLocation = WindowStartupLocation.CenterOwner;// FormStartPosition.CenterParent;
             win.ShowDialog();
+        }
+
+        private void btnHelper_Click(object sender, RoutedEventArgs e)
+        {
+
         }
 
         private void ftpOpen()
@@ -2566,16 +2571,38 @@ namespace DoubleX.Upload
 
         private void ShowRegisterButton(bool isTrial)
         {
-            this.btnRegister.Visibility = Visibility.Visible;
-            this.btnFTPServerView.Visibility = Visibility.Collapsed;
-
             if (!isTrial)
             {
-                this.btnRegister.Visibility = Visibility.Collapsed;
+                if (licenseFileModel.Edition == EnumEditionType.Basic.ToString())
+                {
+                    this.btnRegister.Content = "已授基础版";
+                }
+                //专业版设置
+                if (licenseFileModel.Edition == EnumEditionType.Professional.ToString())
+                {
+                    this.btnRegister.Content = "已授高级版";
+                }
+                this.btnRegister.Style = this.FindResource("Button-Info") as Style;
+                
+                this.btnRegister.ApplyTemplate();
                 if (ftpUtil != null && ftpUtil.IsConnection)
                 {
-                    this.btnFTPServerView.Visibility = Visibility.Visible;
+                    this.btnRegister.Visibility = Visibility.Collapsed;     //隐藏授权信息
+                    this.btnFTPServerView.Visibility = Visibility.Visible;  //显示目录浏览
                 }
+                else
+                {
+                    this.btnRegister.Visibility = Visibility.Visible;     //隐藏授权信息
+                    this.btnFTPServerView.Visibility = Visibility.Collapsed;  //显示目录浏览
+                }
+            }
+            else
+            {
+                this.btnRegister.Style = this.FindResource("Button-Danger") as Style;
+                this.btnRegister.ApplyTemplate();
+                this.btnRegister.Visibility = Visibility.Visible;
+
+                this.btnFTPServerView.Visibility = Visibility.Collapsed;
             }
         }
 
