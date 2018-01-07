@@ -126,6 +126,12 @@ namespace DoubleX.Upload
             BindTaskList();
             Loading();
             this.Loaded += Main_Loaded;
+
+            txtAddress.Text = "139.196.229.64";
+            txtName.Text = "ftp_shdev_opt";
+            txtPassword.Text = "sh";
+
+
         }
 
         private void Main_Loaded(object sender, RoutedEventArgs e)
@@ -1704,7 +1710,7 @@ namespace DoubleX.Upload
             parameters[1].Value = (int)EnumTaskStatus.己完成;
             parameters[2].Value = fileTotal;
             parameters[3].Value = successTotal;
-            parameters[4].Value = fileTotal- successTotal;
+            parameters[4].Value = fileTotal - successTotal;
 
             SQLiteHelper.ExecuteNonQuery(AppHelper.GetTaskDatabaseConnectionStr(), strSql.ToString(), CommandType.Text, parameters);
         }
@@ -1799,7 +1805,7 @@ namespace DoubleX.Upload
             //更新上传路径：
             ApiBeforeSysModel _sysModel = null;
             try { _sysModel = JsonConvert.DeserializeObject<ApiBeforeSysModel>(beforeJSON); } catch { }
-            if (_sysModel != null)
+            if (_sysModel != null && !string.IsNullOrWhiteSpace(_sysModel._NewServerPath))
             {
                 taskFileEntity.ServerFullPath = _sysModel._NewServerPath;
             }
