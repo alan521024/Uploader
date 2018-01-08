@@ -105,7 +105,7 @@
                                     <Button Name="btnScriptExcute" Margin="0,0,5,0" Click="btnScriptExcute_Click">测试数据库脚本</Button>
                                 </StackPanel>
                                 <TextBlock Grid.Row="4" VerticalAlignment="Center">
-                                    * SQL语句中可用标签： {FileFullPath}->文路径径，{FileSize}->文件大小，{ServerFileFullPath}->文件在服务器路径，<LineBreak/>  {Extension}->文件后缀，{UpDateTime}->上传时间(yyyy-MM-dd HH:mm:ss)<LineBreak/>
+                                    * SQL语句中可用标签： {FileFullPath}->文件路径，{FileSize}->文件大小，{ServerFileFullPath}->文件在服务器路径，<LineBreak/>  {Extension}->文件后缀，{UpDateTime}->上传时间(yyyy-MM-dd HH:mm:ss)<LineBreak/>
                                     * 标签在测试时不可用(标签区分大小写)
                                 </TextBlock>
                             </Grid>
