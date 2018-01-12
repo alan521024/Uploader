@@ -134,7 +134,7 @@ namespace DoubleX.Upload
                 licenseStatModel.Identification = licenseFileModel.Email;
                 licenseStatModel.Mobile = licenseFileModel.Mobile;
 
-                if (AppHelper.LicenseVerify(licenseFileModel, licenseStatModel))
+                if (AppHelper.LicenseVerify(licenseFileModel, licenseStatModel, isReload: true))
                 {
                     AppHelper.LicenseStatReset(licenseFileModel);
                 }

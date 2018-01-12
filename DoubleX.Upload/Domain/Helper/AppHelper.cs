@@ -195,7 +195,7 @@ namespace DoubleX.Upload
 
             //公钥路径
             var pubKeyPath = string.Format("{0}/data/doublex.key", AppDomain.CurrentDomain.BaseDirectory).ToLower();
-            
+
             //读取注册数据文件
             StreamReader sr = new StreamReader(path, Coding);
             string encrytText = sr.ReadToEnd();
@@ -254,7 +254,7 @@ namespace DoubleX.Upload
             #endregion
 
             #endregion
-            
+
             try
             {
                 if (!string.IsNullOrWhiteSpace(decryptText))
@@ -381,7 +381,7 @@ namespace DoubleX.Upload
         /// <summary>
         /// 授权文件验证
         /// </summary>
-        public static bool LicenseVerify(LicenseFileModel fileModel, LicenseStatModel statModel)
+        public static bool LicenseVerify(LicenseFileModel fileModel, LicenseStatModel statModel, bool isReload = false)
         {
             //数据验证
             if (fileModel == null || statModel == null)
@@ -457,25 +457,27 @@ namespace DoubleX.Upload
                 }
             }
 
-            //时间相关验证
-            //可以通过http获取在线时间（防止更改时间）
-            var curDate = DateTime.Now;
-            var minDate = DateTimeHelper.Get("1900-01-01 00:00");
-
-            //时间格式：字符串日期 201x-xx-xx（指定日期过期）
-            var maxDate = DateTimeHelper.Get(fileModel.Date, defaultValue: minDate);
-            if (maxDate > minDate && curDate > DateTimeHelper.GetEnd(maxDate))
+            if (!isReload)
             {
-                throw new LicenseException(LicenseExceptionType.授权试用过期);
-            }
+                //时间相关验证
+                //可以通过http获取在线时间（防止更改时间）
+                var curDate = DateTime.Now;
+                var minDate = DateTimeHelper.Get("1900-01-01 00:00");
 
-            //时间格式：字符串数字 2 (安装后2天过期)
-            var maxDate2 = IntHelper.Get(fileModel.Date);
-            if (maxDate2 > 0 && curDate > DateTimeHelper.GetEnd(statModel.Create.AddDays(maxDate2)))
-            {
-                throw new LicenseException(LicenseExceptionType.授权试用过期);
-            }
+                //时间格式：字符串日期 201x-xx-xx（指定日期过期）
+                var maxDate = DateTimeHelper.Get(fileModel.Date, defaultValue: minDate);
+                if (maxDate > minDate && curDate > DateTimeHelper.GetEnd(maxDate))
+                {
+                    throw new LicenseException(LicenseExceptionType.授权试用过期);
+                }
 
+                //时间格式：字符串数字 2 (安装后2天过期)
+                var maxDate2 = IntHelper.Get(fileModel.Date);
+                if (maxDate2 > 0 && curDate > DateTimeHelper.GetEnd(statModel.Create.AddDays(maxDate2)))
+                {
+                    throw new LicenseException(LicenseExceptionType.授权试用过期);
+                }
+            }
             return true;
         }
 

@@ -2502,8 +2502,19 @@ namespace DoubleX.Upload
                 licenseStatModel = AppHelper.LicenseStatGet(licenseFileModel);
 
                 //信息校验
-                AppHelper.LicenseVerify(licenseFileModel, licenseStatModel);
-
+                try
+                {
+                    AppHelper.LicenseVerify(licenseFileModel, licenseStatModel);
+                }
+                catch (LicenseException ex)
+                {
+                    if (MessageBox.Show(string.Format("{0}(官方网站：{1})", ExceptionHelper.GetMessage(ex), url), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
+                    {
+                        System.Diagnostics.Process.Start("explorer.exe", url);
+                        btnTaskRunning.Visibility = Visibility.Collapsed;
+                    }
+                }
+                
                 //基本版设置
                 if (licenseFileModel.Edition == EnumEditionType.Basic.ToString())
                 {
@@ -2538,15 +2549,6 @@ namespace DoubleX.Upload
                     tabApiAfter.Visibility = Visibility.Visible;
                 }
 
-            }
-            catch (LicenseException ex)
-            {
-                if (MessageBox.Show(string.Format("{0}(官方网站：{1})", ExceptionHelper.GetMessage(ex), url), "提示信息", MessageBoxButton.OK, MessageBoxImage.Error) == MessageBoxResult.OK)
-                {
-                    System.Diagnostics.Process.Start("explorer.exe", url);
-                    Application.Current.Shutdown();
-                    return;
-                }
             }
             catch (Exception ex)
             {
